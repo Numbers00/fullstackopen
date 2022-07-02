@@ -1,3 +1,4 @@
+import { getQueriesForElement } from '@testing-library/react';
 import { useEffect, useState } from 'react';
 
 import personService from './services/personService.js';
@@ -12,9 +13,34 @@ const Filter = (props) => {
 }
 
 const PersonForm = (props) => {
-  const {newName, handleNameChange, newNumber, handleNumberChange,  handleFormSubmit} = props;
+  const {newName, handleNameChange, newNumber, handleNumberChange,  handleFormSubmit, successMessage, errorMessage} = props;
+
+  const successMessageStyle = {
+    border: '3px solid green',
+    borderRadius: '8px',
+    backgroundColor: 'lightgray',
+    padding: '5px',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: 'green'
+  }
+  const errorMessageStyle = {
+    border: '3px solid red',
+    borderRadius: '8px',
+    backgroundColor: 'lightgray',
+    padding: '5px',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: 'red'
+  }
+
   return (
     <form onSubmit={handleFormSubmit}>
+      <div  style={{display: 'flex'}}>
+        <h2>or add a new person here</h2>&nbsp;
+        {successMessage !== '' ? <p style={successMessageStyle}>{successMessage}</p> : ''}
+        {errorMessage !== '' ? <p style={errorMessageStyle}>{errorMessage}</p> : ''}
+      </div>
       <div>
         name: <input value={newName} onChange={handleNameChange} />
       </div>
@@ -31,7 +57,7 @@ const PersonForm = (props) => {
 }
 
 const Persons = (props) => {
-  const {persons, nameFilter, handleDelete} = props
+  const {persons, nameFilter, handleDelete} = props;
   return (
     <>
       {persons.map(e => {
@@ -50,6 +76,8 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [nameFilter, setNameFilter] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage]  = useState('');
 
   const getPersons = () => {
     personService
@@ -76,11 +104,14 @@ const App = () => {
       })
       .then(addedPerson => {
         setPersons(persons.concat(addedPerson));
+        setSuccessMessage(`Added ${addedPerson.name}`);
+        setErrorMessage('');
         setNewName('');
         setNewNumber('');
       })
       .catch(error => {
         alert(`Error ${error.response.status}, ${error.response.statusText}`);
+        setSuccessMessage('');
       });
   }
 
@@ -90,9 +121,15 @@ const App = () => {
       .update(TARGET.id, {...TARGET, number: newNumber})
       .then(changedPerson => {
         setPersons(persons.map(e => e.id !== TARGET.id ? e : changedPerson));
+        setSuccessMessage(`Edited ${changedPerson.name}'s number`);
       })
       .catch(error => {
-        alert(`Error ${error.response.status}, ${error.response.statusText}`);
+        if (error.response.status === 404) {
+          setErrorMessage(`Information of ${TARGET.name} might have been removed from the server`);
+        } else {
+          alert(`Error ${error.response.status}, ${error.response.statusText}`);
+        }
+        setSuccessMessage('');
       });
   }
 
@@ -127,7 +164,13 @@ const App = () => {
         setPersons(persons.filter(e => e.id !== id));
       })
       .catch(error => {
-        alert(`Error ${error.response.status}, ${error.response.statusText}`);
+        console.log(error);
+        if (error.response.status === 404) {
+          setErrorMessage(`Information of ${persons.find(e => e.id === id).name} might have been removed from the server`);
+        } else {
+          alert(`Error ${error.response.status}, ${error.response.statusText}`);
+        }
+        setSuccessMessage('');
       });
     }
   }
@@ -143,6 +186,8 @@ const App = () => {
         newNumber={newNumber}
         handleNumberChange={handleNumberChange}
         handleFormSubmit={handleFormSubmit}
+        successMessage={successMessage}
+        errorMessage={errorMessage}
       />
       <h2>Numbers</h2>
       <Persons persons={persons} nameFilter={nameFilter} handleDelete={handleDelete} />
