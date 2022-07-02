@@ -1,4 +1,3 @@
-import { getQueriesForElement } from '@testing-library/react';
 import { useEffect, useState } from 'react';
 
 import personService from './services/personService.js';
