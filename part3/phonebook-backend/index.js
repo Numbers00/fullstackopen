@@ -1,6 +1,7 @@
 // can be import express from 'express', below is CommonJS, "import express" is for ES6 and above
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const app = express();
 
 // middleware
@@ -18,6 +19,7 @@ app.use(morgan(function (tokens, req, res) {
   }
   return params;
 }));
+app.use(cors());
 
 let persons = [
   { 
@@ -88,7 +90,7 @@ app.post('/api/persons', (request, response) => {
       };
       persons = persons.concat(new_person);
 
-      return response.json(persons);
+      return response.json(new_person);
     }
   }
 
@@ -104,7 +106,7 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end();
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port  ${PORT}`);
 })
