@@ -97,7 +97,7 @@ app.post('/api/persons', (request, response) => {
   return response.status(400).json({
     error: 'POST request must have the person\'s name and number'
   });
-})
+});
 
 app.delete('/api/persons/:id', (request, response) => {
   const ID = Number(request.params.id);

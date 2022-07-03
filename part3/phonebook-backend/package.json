@@ -10,6 +10,11 @@
   },
   "author": "Numbers00",
   "license": "ISC",
+  "engines": {
+    "npm": ">=8.0.0",
+    "node": ">=16.0.0"
+  },
+  "engineStrict": true,
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.1",
