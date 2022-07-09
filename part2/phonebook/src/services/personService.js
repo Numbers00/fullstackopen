@@ -1,7 +1,7 @@
 import axios from 'axios';
-// const BASE_URL = 'http://localhost:3001/api/persons';
+const BASE_URL = 'http://localhost:3001/api/persons';
 // const BASE_URL = 'https://fso-2022-nu-phonebook.herokuapp.com/api/persons';
-const BASE_URL = '/api/persons';
+// const BASE_URL = '/api/persons';
 
 const getAll = () => {
   return axios
