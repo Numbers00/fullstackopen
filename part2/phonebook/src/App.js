@@ -109,7 +109,7 @@ const App = () => {
         setNewNumber('');
       })
       .catch(error => {
-        alert(`Error ${error.response.status}, ${error.response.statusText}`);
+        setErrorMessage(error.response.data.error);
         setSuccessMessage('');
       });
   }
@@ -120,13 +120,15 @@ const App = () => {
       .update(TARGET.id, {...TARGET, number: newNumber})
       .then(changedPerson => {
         setPersons(persons.map(e => e.id !== TARGET.id ? e : changedPerson));
+        setErrorMessage('');
         setSuccessMessage(`Edited ${changedPerson.name}'s number`);
       })
       .catch(error => {
         if (error.response.status === 404) {
           setErrorMessage(`Information of ${TARGET.name} might have been removed from the server`);
         } else {
-          alert(`Error ${error.response.status}, ${error.response.statusText}`);
+          // alert(`Error ${error.response.status}, ${error.response.statusText}`);
+          setErrorMessage(error.response.data.error);
         }
         setSuccessMessage('');
       });
@@ -161,9 +163,9 @@ const App = () => {
       .remove(id, persons)
       .then(() => {
         setPersons(persons.filter(e => e.id !== id));
+        setErrorMessage('');
       })
       .catch(error => {
-        console.log(error);
         if (error.response.status === 404) {
           setErrorMessage(`Information of ${persons.find(e => e.id === id).name} might have been removed from the server`);
         } else {
