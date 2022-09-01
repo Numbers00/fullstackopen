@@ -1,9 +1,0 @@
-POST http://localhost:3003/api/blogs
-content-type: application/json
-
-{
-  "title": "Best and Worst Passive Income Ideas for 2022",
-  "author": "Mandy C.",
-  "url": "https://medium.com/@mandyc852/best-and-worst-passive-income-ideas-for-2022-705a1beacca6",
-  "likes": 2234
-}

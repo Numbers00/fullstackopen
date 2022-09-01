@@ -1,21 +1,35 @@
 const mongoose = require('mongoose');
 const supertest = require('supertest');
+const bcrypt = require('bcrypt');
+
 const helper = require('./test_helper');
 const app = require('../app.js');
 const api = supertest(app);
 
-const Blog = require('../models/blog');
+const Blog = require('../models/blog.js');
+const User = require('../models/user.js');
 
 beforeEach(async () => {
-  await Blog.deleteMany({});
+  await User.deleteMany({});
 
-  const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
-  const promiseArr = blogObjects.map(blog => blog.save());
-  await Promise.all(promiseArr);
+  const password = 'password';
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(password, saltRounds);
+  const user = new User({ username: 'root', passwordHash });
+
+  await user.save();
 });
 
 //remove long timeouts if testing performance/speed
 describe('when there is initially some blogs saved', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({});
+
+    const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
+    const promiseArr = blogObjects.map(blog => blog.save());
+    await Promise.all(promiseArr);
+  });
+
   test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
@@ -35,7 +49,20 @@ describe('when there is initially some blogs saved', () => {
 });
 
 describe('addition of a blog', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({});
+
+    const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
+    const promiseArr = blogObjects.map(blog => blog.save());
+    await Promise.all(promiseArr);
+  });
+
   test('HTTP POST successfully creates a new blog post', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'password' });
+    const token = loginResponse.body.token;
+
     const newBlog = {
       title: 'new blog',
       author: 'new author',
@@ -45,16 +72,22 @@ describe('addition of a blog', () => {
   
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
     
     const blogsAtEnd = await helper.blogsInDb();
     expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1);
-    expect(blogsAtEnd).toContainEqual(response.body);
+    expect(blogsAtEnd.map(blog => blog.title)).toContainEqual(response.body.title);
   }, 100000);
   
   test('HTTP POST requests for blogs that do not contain "likes" will have it default to 0', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'password' });
+    const token = loginResponse.body.token;
+    
     const newBlog = {
       title: 'new blog',
       author: 'new author',
@@ -63,6 +96,7 @@ describe('addition of a blog', () => {
   
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -73,6 +107,11 @@ describe('addition of a blog', () => {
   }, 100000);
   
   test('HTTP POST requests for blogs that do not contain "title" or "url" will return status code 400', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'password' });
+    const token = loginResponse.body.token;
+    
     const newBlog = {
       url: 'http://newsite.com',
       likes: 4
@@ -80,13 +119,37 @@ describe('addition of a blog', () => {
   
     await api
       .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
       .send(newBlog)
       .expect(400);
+  }, 100000);
+
+  test('HTTP POST requests for blogs that do not have a bearer token authorization will return status code 401', async () => {
+    const newBlog = {
+      title: 'new blog',
+      author: 'new author',
+      url: 'http://newsite.com',
+      likes: 0
+    };
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401);
   }, 100000);
 });
 
 describe('deletion of a blog', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({});
+
+    const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
+    const promiseArr = blogObjects.map(blog => blog.save());
+    await Promise.all(promiseArr);
+  });
+
   test('succeeds with status code 204 if id is valid', async () => {
+
     const blogsAtStart = await helper.blogsInDb();
     const blogToDelete = blogsAtStart[0];
 
@@ -100,9 +163,36 @@ describe('deletion of a blog', () => {
 });
 
 describe('updating a blog', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({});
+
+    const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
+    const promiseArr = blogObjects.map(blog => blog.save());
+    await Promise.all(promiseArr);
+  });
+  
   test('succeeds and returns status code 200 if id is valid', async () => {
+    const loginResponse = await api
+      .post('/api/login')
+      .send({ username: 'root', password: 'password' });
+    const token = loginResponse.body.token;
+
+    const newBlog = {
+      title: 'new blog',
+      author: 'new author',
+      url: 'http://newsite.com',
+      likes: 0
+    };
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `bearer ${token}`)
+      .send(newBlog)
+      .expect(201);
+
     const blogsAtStart = await helper.blogsInDb();
-    const blogToUpdate = blogsAtStart[0];
+    const blogToUpdate = blogsAtStart.at(-1);
+
     const updatedBlog = {
       'title': blogToUpdate.title,
       'author': blogToUpdate.author,
