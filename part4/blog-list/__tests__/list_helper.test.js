@@ -69,6 +69,11 @@ test('dummy returns one', () => {
 });
 
 describe('total likes', () => {
+  test('of empty list is zero', () => {
+    const result = listHelper.totalLikes([]);
+    expect(result).toBe(0);
+  });
+
   test('when list has only one blog, equals the likes of that', () => {
     const result = listHelper.totalLikes(listWithOneBlog);
     expect(result).toBe(5);
