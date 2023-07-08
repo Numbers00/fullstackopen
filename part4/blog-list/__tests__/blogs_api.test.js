@@ -9,6 +9,9 @@ const api = supertest(app);
 const Blog = require('../models/blog.js');
 const User = require('../models/user.js');
 
+// in case of mongoose timeouts, separete from jest timeouts
+mongoose.set('bufferTimeoutMS', 30000);
+
 beforeEach(async () => {
   await User.deleteMany({});
 
