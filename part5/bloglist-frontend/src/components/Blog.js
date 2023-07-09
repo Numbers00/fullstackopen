@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog, likeBlog }) => {
+const Blog = ({ blog, likeBlog, removeBlog }) => {
   const [isDetailed, setIsDetailed] = useState(false);
 
   return (
@@ -15,7 +15,13 @@ const Blog = ({ blog, likeBlog }) => {
         <div style={{ display: 'flex' }}>
           <span>{blog.likes} likes</span>&nbsp;<button type='button' onClick={() => likeBlog(blog.id, blog)}>Like</button>
         </div>
-        {(blog.user && blog.user.name) ? <span>Added by {blog.user.name}</span> : null}
+        {(blog.user && blog.user.name)
+          ? <span>
+              Added by {blog.user.name}&nbsp;
+              <button type='button' onClick={() => removeBlog(blog.id, blog)}>Remove</button>
+            </span>
+          : null
+        }
       </div>
       <br />
     </div> 

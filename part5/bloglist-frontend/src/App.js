@@ -77,7 +77,7 @@ const CreateBlogForm = (props) => {
           <input
             id='titleInput' 
             type='text'
-            value={newBlog.title}
+            value={newBlog.title || ''}
             onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
           />
         </div>
@@ -86,7 +86,7 @@ const CreateBlogForm = (props) => {
           <input
             id='authorInput'
             type='text'
-            value={newBlog.author}
+            value={newBlog.author || ''}
             onChange={e => setNewBlog({ ...newBlog, author: e.target.value })}
           />
         </div>
@@ -95,7 +95,7 @@ const CreateBlogForm = (props) => {
           <input
             id='urlInput'
             type='text'
-            value={newBlog.url}
+            value={newBlog.url || ''}
             onChange={e => setNewBlog({ ...newBlog, url: e.target.value })}
           />
         </div>
@@ -182,6 +182,20 @@ const App = () => {
     }
   };
 
+  const removeBlog = async (id, blog) => {
+    try {
+      const isConfirmed = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
+      if (!isConfirmed) return;
+
+      await blogService.remove(id);
+      setBlogs(blogs.filter(b => b.id !== id));
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Failed to remove blog');
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
+
   if (!user) {
     return (
       <div>
@@ -211,7 +225,7 @@ const App = () => {
       </Togglable>
       <div style={{ marginBottom: 8 }}>
         {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} blog={blog} likeBlog={likeBlog} />
+          <Blog key={blog.id} blog={blog} likeBlog={likeBlog} removeBlog={removeBlog} />
         )}
       </div>
     </div>
