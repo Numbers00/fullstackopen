@@ -58,13 +58,61 @@ const LoginForm = (props) => {
 };
 
 
+const CreateBlogForm = (props) => {
+  const [newBlog, setNewBlog] = useState({});
+
+  const createBlog = e => {
+    e.preventDefault();
+
+
+    props.createBlog(newBlog);
+    setNewBlog({title: '', author: '', url: ''});
+  };
+
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <h2>create new</h2>
+      <form onSubmit={createBlog} style={{ marginBottom: 8 }}>
+        <div style={{ display: 'flex', marginBottom: 8 }}>
+          <label htmlFor='titleInput'>title:</label>&nbsp;
+          <input
+            id='titleInput' 
+            type='text'
+            value={newBlog.title}
+            onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
+          />
+        </div>
+        <div style={{ display: 'flex', marginBottom: 8 }}>
+          <label htmlFor='authorInput'>author:</label>&nbsp;
+          <input
+            id='authorInput'
+            type='text'
+            value={newBlog.author}
+            onChange={e => setNewBlog({ ...newBlog, author: e.target.value })}
+          />
+        </div>
+        <div style={{ display: 'flex', marginBottom: 8 }}>
+          <label htmlFor='urlInput'>url:</label>&nbsp;
+          <input
+            id='urlInput'
+            type='text'
+            value={newBlog.url}
+            onChange={e => setNewBlog({ ...newBlog, url: e.target.value })}
+          />
+        </div>
+      </form>
+      <button type='button' onClick={createBlog}>Create</button>
+    </div>
+  );
+};
+
+
 const App = () => {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const [blogs, setBlogs] = useState([]);
-  const [newBlog, setNewBlog] = useState({});
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -108,14 +156,11 @@ const App = () => {
     setUser(null);
   };
 
-  const createBlog = async e => {
-    e.preventDefault();
-
+  const createBlog = async (newBlog) => {
     try {
       const createdBlog = await blogService.create(newBlog);
       setBlogs(blogs.concat(createdBlog));
-      setNewBlog({title: '', author: '', url: ''});
-      setSuccessMessage(`added ${createdBlog.title} by ${createdBlog.author}`);
+      setSuccessMessage(`Added ${createdBlog.title} by ${createdBlog.author}`);
       setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       console.error(err);
@@ -147,39 +192,9 @@ const App = () => {
       { successMessage && <span style={{ color: 'green' }}>{successMessage}</span> }
       { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
       <Togglable buttonLabel={'Create Blog'}>
-        <div style={{ marginBottom: 8 }}>
-          <h2>create new</h2>
-          <form onSubmit={createBlog} style={{ marginBottom: 8 }}>
-            <div style={{ display: 'flex', marginBottom: 8 }}>
-              <label htmlFor='titleInput'>title:</label>&nbsp;
-              <input
-                id='titleInput' 
-                type='text'
-                value={newBlog.title}
-                onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
-              />
-            </div>
-            <div style={{ display: 'flex', marginBottom: 8 }}>
-              <label htmlFor='authorInput'>author:</label>&nbsp;
-              <input
-                id='authorInput'
-                type='text'
-                value={newBlog.author}
-                onChange={e => setNewBlog({ ...newBlog, author: e.target.value })}
-              />
-            </div>
-            <div style={{ display: 'flex', marginBottom: 8 }}>
-              <label htmlFor='urlInput'>url:</label>&nbsp;
-              <input
-                id='urlInput'
-                type='text'
-                value={newBlog.url}
-                onChange={e => setNewBlog({ ...newBlog, url: e.target.value })}
-              />
-            </div>
-          </form>
-          <button type='button' onClick={createBlog}>Create</button>
-        </div>
+        <CreateBlogForm
+          createBlog={createBlog}
+        />
       </Togglable>
       <div style={{ marginBottom: 8 }}>
         {blogs.map(blog =>
