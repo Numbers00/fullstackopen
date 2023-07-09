@@ -6,7 +6,7 @@ const Blog = ({blog}) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex' }}>
-        {blog.title}&nbsp;<button type='button' onClick={() => setIsDetailed(!isDetailed)}>{isDetailed ? 'Hide' : 'View'}</button>
+        {blog.title} {blog.author}&nbsp;<button type='button' onClick={() => setIsDetailed(!isDetailed)}>{isDetailed ? 'Hide' : 'View'}</button>
       </div>
       <div
         style={{ display: isDetailed ? 'flex' : 'none', flexDirection: 'column' }}
@@ -15,9 +15,9 @@ const Blog = ({blog}) => {
         <div style={{ display: 'flex' }}>
           <span>{blog.likes} likes</span>&nbsp;<button type='button'>Like</button>
         </div>
-        <span>{blog.author}</span>
+        {(blog.user && blog.user.name) ? <span>Added by {blog.user.name}</span> : null}
       </div>
-      <hr />
+      <br />
     </div> 
   ); 
 };
