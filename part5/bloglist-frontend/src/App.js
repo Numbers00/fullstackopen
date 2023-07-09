@@ -64,7 +64,6 @@ const CreateBlogForm = (props) => {
   const createBlog = e => {
     e.preventDefault();
 
-
     props.createBlog(newBlog);
     setNewBlog({title: '', author: '', url: ''});
   };
@@ -126,9 +125,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    );
+    blogService.getAll().then(blogs => setBlogs(blogs || []));
   }, []);
 
   const login = async (e) => {
@@ -137,8 +134,7 @@ const App = () => {
     try {
       const user = await loginService.login({
         username, password
-      });
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
+      });      
 
       blogService.setToken(user.token);
       setUser(user);
@@ -159,12 +155,29 @@ const App = () => {
   const createBlog = async (newBlog) => {
     try {
       const createdBlog = await blogService.create(newBlog);
+      createdBlog.user = user;
       setBlogs(blogs.concat(createdBlog));
       setSuccessMessage(`Added ${createdBlog.title} by ${createdBlog.author}`);
       setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       console.error(err);
       setErrorMessage('Failed to create blog');
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
+
+  const likeBlog = async (id, blog) => {
+    try {
+      const likedBlog = {
+        ...blog,
+        likes: blog.likes + 1
+      };
+  
+      await blogService.update(id, likedBlog);
+      setBlogs(blogs.map(b => b.id === id ? likedBlog : b));
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Failed to like blog');
       setTimeout(() => setErrorMessage(null), 5000);
     }
   };
@@ -198,7 +211,7 @@ const App = () => {
       </Togglable>
       <div style={{ marginBottom: 8 }}>
         {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
+          <Blog key={blog.id} blog={blog} likeBlog={likeBlog} />
         )}
       </div>
     </div>

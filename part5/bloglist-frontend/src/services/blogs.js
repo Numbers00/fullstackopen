@@ -12,14 +12,23 @@ const getAll = () => {
   return request.then(response => response.data);
 };
 
-const create = async newBlog => {
+const create = newBlog => {
   const config = {
     headers: { Authorization: token },
   };
 
-  const response = await axios.post(baseUrl, newBlog, config);
-  return response.data;
+  const request = axios.post(baseUrl, newBlog, config);
+  return request.then(response => response.data);
+};
+
+const update = async (id, newBlog) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  const request = axios.put(`${baseUrl}/${id}`, newBlog, config);
+  return request.then(response => response.data);
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default { setToken, getAll, create };
+export default { setToken, getAll, create, update };
