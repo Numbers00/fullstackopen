@@ -4,6 +4,27 @@ import Blog from './components/Blog';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
+
+const Togglable = (props) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const showWhenVisible = { display: isVisible ? '' : 'none' };
+  const hideWhenVisible = { display: isVisible ? 'none' : '' };
+
+  return (
+    <>
+      <div style={hideWhenVisible}>
+        <button type='button' onClick={() => setIsVisible(true)}>{props.buttonLabel}</button>
+      </div>
+      <div style={showWhenVisible}>
+        <button type='button' onClick={() => setIsVisible(false)}>Hide "{props.buttonLabel}"</button>
+        {props.children}
+      </div>
+    </>
+  );
+};
+
+
 const LoginForm = (props) => {
   const {
     login,
@@ -35,6 +56,7 @@ const LoginForm = (props) => {
     </form>
   );
 };
+
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -124,39 +146,41 @@ const App = () => {
       </p>
       { successMessage && <span style={{ color: 'green' }}>{successMessage}</span> }
       { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
-      <div style={{ marginBottom: 8 }}>
-        <h2>create new</h2>
-        <form onSubmit={createBlog} style={{ marginBottom: 8 }}>
-          <div style={{ display: 'flex', marginBottom: 8 }}>
-            <label htmlFor='titleInput'>title:</label>&nbsp;
-            <input
-              id='titleInput' 
-              type='text'
-              value={newBlog.title}
-              onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
-            />
-          </div>
-          <div style={{ display: 'flex', marginBottom: 8 }}>
-            <label htmlFor='authorInput'>author:</label>&nbsp;
-            <input
-              id='authorInput'
-              type='text'
-              value={newBlog.author}
-              onChange={e => setNewBlog({ ...newBlog, author: e.target.value })}
-            />
-          </div>
-          <div style={{ display: 'flex', marginBottom: 8 }}>
-            <label htmlFor='urlInput'>url:</label>&nbsp;
-            <input
-              id='urlInput'
-              type='text'
-              value={newBlog.url}
-              onChange={e => setNewBlog({ ...newBlog, url: e.target.value })}
-            />
-          </div>
-        </form>
-        <button type='button' onClick={createBlog}>create</button>
-      </div>
+      <Togglable buttonLabel={'Create Blog'}>
+        <div style={{ marginBottom: 8 }}>
+          <h2>create new</h2>
+          <form onSubmit={createBlog} style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', marginBottom: 8 }}>
+              <label htmlFor='titleInput'>title:</label>&nbsp;
+              <input
+                id='titleInput' 
+                type='text'
+                value={newBlog.title}
+                onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
+              />
+            </div>
+            <div style={{ display: 'flex', marginBottom: 8 }}>
+              <label htmlFor='authorInput'>author:</label>&nbsp;
+              <input
+                id='authorInput'
+                type='text'
+                value={newBlog.author}
+                onChange={e => setNewBlog({ ...newBlog, author: e.target.value })}
+              />
+            </div>
+            <div style={{ display: 'flex', marginBottom: 8 }}>
+              <label htmlFor='urlInput'>url:</label>&nbsp;
+              <input
+                id='urlInput'
+                type='text'
+                value={newBlog.url}
+                onChange={e => setNewBlog({ ...newBlog, url: e.target.value })}
+              />
+            </div>
+          </form>
+          <button type='button' onClick={createBlog}>Create</button>
+        </div>
+      </Togglable>
       <div style={{ marginBottom: 8 }}>
         {blogs.map(blog =>
           <Blog key={blog.id} blog={blog} />
