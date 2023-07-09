@@ -43,6 +43,8 @@ const App = () => {
 
   const [blogs, setBlogs] = useState([]);
   const [newBlog, setNewBlog] = useState({});
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
@@ -66,13 +68,16 @@ const App = () => {
       const user = await loginService.login({
         username, password
       });
-      console.log('user', user);
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user));
+
       blogService.setToken(user.token);
       setUser(user);
       setUsername('');
       setPassword('');
     } catch (err) {
       console.error(err);
+      setErrorMessage('Wrong username or password');
+      setTimeout(() => setErrorMessage(null), 5000);
     }
   };
 
@@ -81,10 +86,27 @@ const App = () => {
     setUser(null);
   };
 
-  if (user === null) {
+  const createBlog = async e => {
+    e.preventDefault();
+
+    try {
+      const createdBlog = await blogService.create(newBlog);
+      setBlogs(blogs.concat(createdBlog));
+      setNewBlog({title: '', author: '', url: ''});
+      setSuccessMessage(`added ${createdBlog.title} by ${createdBlog.author}`);
+      setTimeout(() => setSuccessMessage(null), 5000);
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Failed to create blog');
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
+  };
+
+  if (!user) {
     return (
       <div>
         <h2>Log in to application</h2>
+        { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
         <LoginForm
           login={login}
           username={username} setUsername={setUsername}
@@ -94,24 +116,14 @@ const App = () => {
     )
   };
 
-  const createBlog = async e => {
-    e.preventDefault();
-
-    try {
-      const createdBlog = await blogService.create(newBlog);
-      setBlogs(blogs.concat(createdBlog));
-      setNewBlog({});
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <div>
       <h2>blogs</h2>
       <p>
         {user.name} logged in <button type='button' onClick={logout}>Logout</button>
       </p>
+      { successMessage && <span style={{ color: 'green' }}>{successMessage}</span> }
+      { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
       <div style={{ marginBottom: 8 }}>
         <h2>create new</h2>
         <form onSubmit={createBlog} style={{ marginBottom: 8 }}>
