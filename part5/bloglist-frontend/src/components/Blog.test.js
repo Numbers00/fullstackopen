@@ -46,4 +46,12 @@ describe('<Blog />', () => {
 
     expect(urlAndLikesDiv).not.toHaveStyle('display: none');
   });
+
+  test('if the like button is clicked twice, the event handler is called twice', async () => {
+    const likeButton = screen.getByText('Like');
+    await user.click(likeButton);
+    await user.click(likeButton);
+
+    expect(likeBlog.mock.calls).toHaveLength(2);
+  });
 });
