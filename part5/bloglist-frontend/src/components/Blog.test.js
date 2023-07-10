@@ -1,0 +1,36 @@
+import React from 'react';
+import '@testing-library/jest-dom/extend-expect';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import Blog from './Blog';
+
+describe('<Blog />', () => {
+  const blog = {
+    title: 'Test Title',
+    author: 'Test Author',
+    url: 'http://test.com',
+    likes: 0,
+    user: { username: 'testuser', name: 'Test User' }
+  };
+
+  const likeBlog = jest.fn();
+  const removeBlog = jest.fn();
+
+  let container;
+  beforeEach(() => {
+    container = render(
+      <Blog blog={blog} likeBlog={likeBlog} removeBlog={removeBlog} />
+    ).container;
+  });
+
+  const user = userEvent.setup();
+  test('renders title and author but not url or likes by default', async () => {
+    await screen.findByText(`${blog.title} ${blog.author}`);
+    const urlAndLikesDiv = container
+      .querySelector('div')
+      .querySelector('div:nth-child(2)');
+
+    expect(urlAndLikesDiv).toHaveStyle('display: none');
+  });
+});

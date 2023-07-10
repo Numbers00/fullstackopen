@@ -17,15 +17,15 @@ const Blog = ({ blog, likeBlog, removeBlog }) => {
         </div>
         {(blog.user && blog.user.name)
           ? <span>
-              Added by {blog.user.name}&nbsp;
-              <button type='button' onClick={() => removeBlog(blog.id, blog)}>Remove</button>
-            </span>
+            Added by {blog.user.name}&nbsp;
+            <button type='button' onClick={() => removeBlog(blog.id, blog)}>Remove</button>
+          </span>
           : null
         }
       </div>
       <br />
-    </div> 
-  ); 
+    </div>
+  );
 };
 
 export default Blog;
