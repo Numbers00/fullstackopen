@@ -75,7 +75,7 @@ const LoginForm = (props) => {
 };
 
 
-const CreateBlogForm = (props) => {
+export const CreateBlogForm = (props) => {
   const [newBlog, setNewBlog] = useState({});
 
   const createBlog = e => {

@@ -7,6 +7,7 @@ import Blog from './Blog';
 
 describe('<Blog />', () => {
   const blog = {
+    id: 'testid',
     title: 'Test Title',
     author: 'Test Author',
     url: 'http://test.com',
