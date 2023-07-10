@@ -1,15 +1,25 @@
-import { useState, useEffect } from 'react';
+import { forwardRef, useEffect, useRef, useState, useImperativeHandle } from 'react';
 import Blog from './components/Blog';
 
 import blogService from './services/blogs';
 import loginService from './services/login';
 
 
-const Togglable = (props) => {
+const Togglable = forwardRef((props, refs) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const showWhenVisible = { display: isVisible ? '' : 'none' };
   const hideWhenVisible = { display: isVisible ? 'none' : '' };
+
+  const toggleVisibility = () => {
+    setIsVisible(!isVisible);
+  };
+
+  useImperativeHandle(refs, () => {
+    return {
+      toggleVisibility
+    }
+  });
 
   return (
     <>
@@ -22,7 +32,7 @@ const Togglable = (props) => {
       </div>
     </>
   );
-};
+});
 
 
 const LoginForm = (props) => {
@@ -115,6 +125,8 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
 
+  const blogFormRef = useRef();
+
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
     if (loggedUserJSON) {
@@ -137,6 +149,7 @@ const App = () => {
       });      
 
       blogService.setToken(user.token);
+
       setUser(user);
       setUsername('');
       setPassword('');
@@ -156,6 +169,10 @@ const App = () => {
     try {
       const createdBlog = await blogService.create(newBlog);
       createdBlog.user = user;
+
+      blogFormRef.current.toggleVisibility();
+      console.log('blogFormRef', blogFormRef.current);
+      
       setBlogs(blogs.concat(createdBlog));
       setSuccessMessage(`Added ${createdBlog.title} by ${createdBlog.author}`);
       setTimeout(() => setSuccessMessage(null), 5000);
@@ -218,7 +235,7 @@ const App = () => {
       </p>
       { successMessage && <span style={{ color: 'green' }}>{successMessage}</span> }
       { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
-      <Togglable buttonLabel={'Create Blog'}>
+      <Togglable buttonLabel={'Create Blog'} ref={blogFormRef}>
         <CreateBlogForm
           createBlog={createBlog}
         />
