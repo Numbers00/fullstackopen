@@ -1,4 +1,7 @@
+import PropTypes from 'prop-types';
+
 import { forwardRef, useEffect, useRef, useState, useImperativeHandle } from 'react';
+
 import Blog from './components/Blog';
 
 import blogService from './services/blogs';
@@ -18,7 +21,7 @@ const Togglable = forwardRef((props, refs) => {
   useImperativeHandle(refs, () => {
     return {
       toggleVisibility
-    }
+    };
   });
 
   return (
@@ -27,13 +30,17 @@ const Togglable = forwardRef((props, refs) => {
         <button type='button' onClick={() => setIsVisible(true)}>{props.buttonLabel}</button>
       </div>
       <div style={showWhenVisible}>
-        <button type='button' onClick={() => setIsVisible(false)}>Hide "{props.buttonLabel}"</button>
+        <button type='button' onClick={() => setIsVisible(false)}>Hide &quot;{props.buttonLabel}&quot;</button>
         {props.children}
       </div>
     </>
   );
 });
 
+Togglable.propTypes = {
+  buttonLabel: PropTypes.string.isRequired
+};
+Togglable.displayName = 'Togglable';
 
 const LoginForm = (props) => {
   const {
@@ -75,7 +82,7 @@ const CreateBlogForm = (props) => {
     e.preventDefault();
 
     props.createBlog(newBlog);
-    setNewBlog({title: '', author: '', url: ''});
+    setNewBlog({ title: '', author: '', url: '' });
   };
 
   return (
@@ -85,7 +92,7 @@ const CreateBlogForm = (props) => {
         <div style={{ display: 'flex', marginBottom: 8 }}>
           <label htmlFor='titleInput'>title:</label>&nbsp;
           <input
-            id='titleInput' 
+            id='titleInput'
             type='text'
             value={newBlog.title || ''}
             onChange={e => setNewBlog({ ...newBlog, title: e.target.value })}
@@ -146,7 +153,7 @@ const App = () => {
     try {
       const user = await loginService.login({
         username, password
-      });      
+      });
 
       blogService.setToken(user.token);
 
@@ -172,7 +179,7 @@ const App = () => {
 
       blogFormRef.current.toggleVisibility();
       console.log('blogFormRef', blogFormRef.current);
-      
+
       setBlogs(blogs.concat(createdBlog));
       setSuccessMessage(`Added ${createdBlog.title} by ${createdBlog.author}`);
       setTimeout(() => setSuccessMessage(null), 5000);
@@ -189,7 +196,7 @@ const App = () => {
         ...blog,
         likes: blog.likes + 1
       };
-  
+
       await blogService.update(id, likedBlog);
       setBlogs(blogs.map(b => b.id === id ? likedBlog : b));
     } catch (err) {
@@ -224,8 +231,8 @@ const App = () => {
           password={password} setPassword={setPassword}
         />
       </div>
-    )
-  };
+    );
+  }
 
   return (
     <div>
@@ -249,4 +256,4 @@ const App = () => {
   );
 };
 
-export default App
+export default App;
