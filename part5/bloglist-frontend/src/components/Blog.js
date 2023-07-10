@@ -6,7 +6,7 @@ const Blog = ({ blog, likeBlog, removeBlog }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex' }}>
-        {blog.title} {blog.author}&nbsp;<button type='button' onClick={() => setIsDetailed(!isDetailed)}>{isDetailed ? 'Hide' : 'View'}</button>
+        {blog.title} {blog.author}&nbsp;<button type='button' onClick={() => setIsDetailed(!isDetailed)}>{isDetailed ? 'Hide' : 'Show'}</button>
       </div>
       <div
         style={{ display: isDetailed ? 'flex' : 'none', flexDirection: 'column' }}

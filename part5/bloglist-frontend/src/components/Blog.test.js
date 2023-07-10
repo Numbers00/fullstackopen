@@ -33,4 +33,17 @@ describe('<Blog />', () => {
 
     expect(urlAndLikesDiv).toHaveStyle('display: none');
   });
+
+  test('renders url and likes when show button is clicked', async () => {
+    const urlAndLikesDiv = container
+      .querySelector('div')
+      .querySelector('div:nth-child(2)');
+
+    expect(urlAndLikesDiv).toHaveStyle('display: none');
+
+    const showButton = screen.getByText('Show');
+    await user.click(showButton);
+
+    expect(urlAndLikesDiv).not.toHaveStyle('display: none');
+  });
 });
