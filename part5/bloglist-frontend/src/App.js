@@ -91,7 +91,7 @@ const App = () => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON);
-      setUser(user);
+      setUser(user.user);
       blogService.setToken(user.token);
     }
   }, []);
@@ -110,7 +110,7 @@ const App = () => {
 
       blogService.setToken(user.token);
 
-      setUser(user);
+      setUser(user.user);
       setUsername('');
       setPassword('');
     } catch (err) {
@@ -131,7 +131,6 @@ const App = () => {
       createdBlog.user = user;
 
       blogFormRef.current.toggleVisibility();
-      console.log('blogFormRef', blogFormRef.current);
 
       setBlogs(blogs.concat(createdBlog));
       setSuccessMessage(`Added ${createdBlog.title} by ${createdBlog.author}`);
@@ -202,7 +201,7 @@ const App = () => {
       </Togglable>
       <div style={{ marginBottom: 8 }}>
         {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} blog={blog} likeBlog={likeBlog} removeBlog={removeBlog} />
+          <Blog key={blog.id} user={user} blog={blog} likeBlog={likeBlog} removeBlog={removeBlog} />
         )}
       </div>
     </div>

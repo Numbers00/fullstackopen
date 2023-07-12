@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog, likeBlog, removeBlog }) => {
+const Blog = ({ user, blog, likeBlog, removeBlog }) => {
   const [isDetailed, setIsDetailed] = useState(false);
 
   return (
@@ -18,7 +18,8 @@ const Blog = ({ blog, likeBlog, removeBlog }) => {
         {(blog.user && blog.user.name)
           ? <span>
             Added by {blog.user.name}&nbsp;
-            <button type='button' onClick={() => removeBlog(blog.id, blog)}>Remove</button>
+            {blog.user.id === user.id
+              && <button type='button' onClick={() => removeBlog(blog.id, blog)}>Remove</button>}
           </span>
           : null
         }

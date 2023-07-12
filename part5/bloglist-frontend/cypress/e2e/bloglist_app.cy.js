@@ -78,7 +78,7 @@ describe('Blog app', function() {
           .should((blogs) => expect(blogs[0].likes).to.equal(1))
       })
 
-      it('it can be deleted by the user who created it', function() {
+      it('it can be removed by the user who created it', function() {
         cy.contains('Show').click()
         cy.contains('Remove').click()
 
@@ -87,6 +87,21 @@ describe('Blog app', function() {
           .request(Cypress.env('BACKEND') + '/blogs')
           .its('body')
           .should('have.length', 0)
+      })
+
+      it('its remove button does not show for other users', function() {
+        cy.contains('Logout').click()
+
+        cy.request('POST', Cypress.env('BACKEND') + '/users', {
+          username: 'OtherUser',
+          name: 'Other User',
+          password: 'OtherPassword'
+        })
+
+        cy.login({ username: 'OtherUser', password: 'OtherPassword' })
+
+        cy.contains('Show').click()
+        cy.get('Remove').should('not.exist')
       })
     })
   })
