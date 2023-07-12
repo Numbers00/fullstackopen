@@ -61,5 +61,29 @@ describe('Blog app', function() {
           expect(blogs[0]).to.deep.include({ title: 'Test Title', author: 'Test Author', url: 'http://test.com' })
         })
     })
+
+    describe('and a blog exists', function() {
+      beforeEach(function() {
+        cy.createBlog({ title: 'Test Title', author: 'Test Author', url: 'http://test.com' })
+      })
+
+      it('it can be liked', function() {
+        cy
+          .request(Cypress.env('BACKEND') + '/blogs')
+          .its('body')
+          .should((blogs) => expect(blogs[0].likes).to.equal(0))
+
+        cy.contains('0 likes')
+
+        cy.contains('Show').click()
+        cy.contains('Like').click()
+
+        cy.contains('1 likes')
+        cy
+          .request(Cypress.env('BACKEND') + '/blogs')
+          .its('body')
+          .should((blogs) => expect(blogs[0].likes).to.equal(1))
+      })
+    })
   })
 })
