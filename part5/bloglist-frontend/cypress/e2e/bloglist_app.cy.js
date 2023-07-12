@@ -104,5 +104,33 @@ describe('Blog app', function() {
         cy.get('Remove').should('not.exist')
       })
     })
+
+    describe('and multiple blogs exist', function() {
+      beforeEach(function() {
+        cy.createBlog({ title: 'Test Title', author: 'Test Author', url: 'http://test.com' })
+        cy.createBlog({ title: 'Test Title 2', author: 'Test Author 2', url: 'http://test2.com' })
+        cy.createBlog({ title: 'Test Title 3', author: 'Test Author 3', url: 'http://test3.com' })
+      })
+
+      it('they are sorted by most likes first', function() {
+        cy.get('.blog-container').eq(0).should('contain', 'Test Title').as('leastLikedBlog')
+        cy.get('.blog-container').eq(1).should('contain', 'Test Title 2').as('mostLikedBlog')
+        cy.get('.blog-container').eq(2).should('contain', 'Test Title 3').as('moreLikedBlog')
+
+        cy.get('@mostLikedBlog').contains('Show').click()
+        cy.get('@mostLikedBlog').contains('Like').click()
+        cy.get('@mostLikedBlog').contains('1 likes')
+        cy.get('@mostLikedBlog').contains('Like').click()
+        cy.get('@mostLikedBlog').contains('2 likes')
+
+        cy.get('@moreLikedBlog').contains('Show').click()
+        cy.get('@moreLikedBlog').contains('Like').click()
+        cy.get('@moreLikedBlog').contains('1 likes')
+
+        cy.get('.blog-container').eq(0).should('contain', 'Test Title 2')
+        cy.get('.blog-container').eq(1).should('contain', 'Test Title 3')
+        cy.get('.blog-container').eq(2).should('contain', 'Test Title')
+      })
+    })
   })
 })

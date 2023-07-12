@@ -4,7 +4,7 @@ const Blog = ({ user, blog, likeBlog, removeBlog }) => {
   const [isDetailed, setIsDetailed] = useState(false);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div className='blog-container' style={{ display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex' }}>
         {blog.title} {blog.author}&nbsp;<button type='button' onClick={() => setIsDetailed(!isDetailed)}>{isDetailed ? 'Hide' : 'Show'}</button>
       </div>
