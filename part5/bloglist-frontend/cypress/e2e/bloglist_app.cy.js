@@ -40,8 +40,6 @@ describe('Blog app', function() {
     })
 
     it('A blog can be created', function() {
-      cy.request(Cypress.env('BACKEND') + '/blogs').its('body').should('have.length', 0)
-
       cy.contains('Test Title Test Author').should('not.exist')
 
       cy.contains('Create Blog').click()
@@ -68,11 +66,6 @@ describe('Blog app', function() {
       })
 
       it('it can be liked', function() {
-        cy
-          .request(Cypress.env('BACKEND') + '/blogs')
-          .its('body')
-          .should((blogs) => expect(blogs[0].likes).to.equal(0))
-
         cy.contains('0 likes')
 
         cy.contains('Show').click()
@@ -83,6 +76,17 @@ describe('Blog app', function() {
           .request(Cypress.env('BACKEND') + '/blogs')
           .its('body')
           .should((blogs) => expect(blogs[0].likes).to.equal(1))
+      })
+
+      it('it can be deleted by the user who created it', function() {
+        cy.contains('Show').click()
+        cy.contains('Remove').click()
+
+        cy.contains('Added by Test User').should('not.exist')
+        cy
+          .request(Cypress.env('BACKEND') + '/blogs')
+          .its('body')
+          .should('have.length', 0)
       })
     })
   })
