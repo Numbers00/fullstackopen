@@ -3,7 +3,8 @@ module.exports = {
   'env': {
     'browser': true,
     'es6': true,
-    'jest/globals': true
+    'jest/globals': true,
+    'cypress/globals': true
   },
   'extends': [
     'eslint:recommended',
@@ -17,7 +18,7 @@ module.exports = {
     'sourceType': 'module'
   },
   'plugins': [
-    'react', 'jest'
+    'react', 'jest', 'cypress'
   ],
   'rules': {
     'indent': [
@@ -32,10 +33,6 @@ module.exports = {
       'error',
       'single'
     ],
-    'semi': [
-      'error',
-      'always'
-    ],
     'eqeqeq': 'error',
     'no-trailing-spaces': 'error',
     'object-curly-spacing': [
@@ -48,6 +45,20 @@ module.exports = {
     'react/prop-types': 0,
     'react/react-in-jsx-scope': 'off'
   },
+  'overrides': [
+    {
+      'files': ['*.js'], // Apply semicolon rule to other JavaScript files
+      'rules': {
+        'semi': ['error', 'always'] // Require semicolons
+      }
+    },
+    {
+      'files': ['cypress/**/*.js'],
+      'rules': {
+        'semi': 'off' // Disable semicolon rule for Cypress files
+      }
+    },
+  ],
   'settings': {
     'react': {
       'version': 'detect'
