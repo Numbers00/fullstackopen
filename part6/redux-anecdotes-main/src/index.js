@@ -7,11 +7,13 @@ import App from './App';
 
 import anecdoteReducer from './slices/anecdote';
 import filterReducer from './slices/filter';
+import notificationReducer from './slices/notification';
 
 const store = configureStore({
   reducer: {
     anecdotes: anecdoteReducer,
-    filter: filterReducer
+    filter: filterReducer,
+    notification: notificationReducer
   }
 });
 
