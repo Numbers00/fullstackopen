@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 
-import { createAnecdote } from '../slices/anecdote';
+import { createAnecdote } from '../slices/anecdotes';
 import { setNotification, removeNotification} from '../slices/notification';
 
 const AnecdoteForm = () => {

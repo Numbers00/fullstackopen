@@ -5,7 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-import anecdoteReducer from './slices/anecdote';
+import anecdoteReducer from './slices/anecdotes';
 import filterReducer from './slices/filter';
 import notificationReducer from './slices/notification';
 
