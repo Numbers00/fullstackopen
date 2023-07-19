@@ -12,7 +12,7 @@ export const createAnecdote = anecdote =>
     .post(`${baseUrl}/anecdotes`, anecdote)
     .then((res) => res.data);
 
-export const voteAnecdote = anecdote =>
+export const updateAnecdote = anecdote =>
   axios
-    .put(`${baseUrl}/anecdotes/${anecdote.id}`, { ...anecdote, votes: anecdote.votes + 1 })
+    .put(`${baseUrl}/anecdotes/${anecdote.id}`, anecdote)
     .then((res) => res.data);
