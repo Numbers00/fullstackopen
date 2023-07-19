@@ -6,9 +6,7 @@ const getAll = () => {
   return req.then(res => res.data);
 };
 
-const getId = () => (100000 * Math.random()).toFixed(0);
-const create = content => {
-  const anecdote = { id: getId(), content, votes: 0 }
+const create = anecdote => {
   const req = axios.post(baseUrl, anecdote);
   return req.then(res => res.data);
 };
