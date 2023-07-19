@@ -6,4 +6,11 @@ const getAll = () => {
   return req.then(res => res.data);
 };
 
-export default { getAll };
+const getId = () => (100000 * Math.random()).toFixed(0);
+const create = (anecdote) => {
+  const obj = { id: getId(), content: anecdote, votes: 0 }
+  const res = axios.post(baseUrl, obj);
+  return res.then(res => res.data);
+};
+
+export default { getAll, create };

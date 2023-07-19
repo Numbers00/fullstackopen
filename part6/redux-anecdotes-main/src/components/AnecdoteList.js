@@ -5,7 +5,7 @@ import { setNotification, removeNotification } from '../slices/notification';
 
 const AnecdoteList = () => {
   const filteredAnecdotes = useSelector(({ anecdotes, filter }) => {
-    return anecdotes.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()));
+    return anecdotes.filter(a => a.content?.toLowerCase().includes(filter.toLowerCase()));
   });
 
   const dispatch = useDispatch();
