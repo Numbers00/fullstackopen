@@ -15,13 +15,15 @@ const AnecdoteForm = () => {
       notificationDispatch({ type: 'SET_NOTIFICATION', payload: `You added '${newAnecdote.content}'`});
       setTimeout(() => notificationDispatch({ type: 'CLEAR_NOTIFICATION' }), 5000);
     },
+    onError: (err) => {
+      notificationDispatch({ type: 'SET_NOTIFICATION', payload: `An error occurred while adding anecdote`});
+      setTimeout(() => notificationDispatch({ type: 'CLEAR_NOTIFICATION' }), 5000);
+    }
   });
 
   const onCreate = (event) => {
     event.preventDefault();
     const content = event.target.anecdote.value;
-    if (content.length < 5) return;
-
     event.target.anecdote.value = '';
 
     const anecdote = {
