@@ -12,21 +12,21 @@ const getAll = () => {
   return request.then(response => response.data);
 };
 
-const create = newBlog => {
+const create = blog => {
   const config = {
     headers: { Authorization: token },
   };
 
-  const request = axios.post(baseUrl, newBlog, config);
+  const request = axios.post(baseUrl, blog, config);
   return request.then(response => response.data);
 };
 
-const update = async (id, newBlog) => {
+const update = async blog => {
   const config = {
     headers: { Authorization: token },
   };
 
-  const request = axios.put(`${baseUrl}/${id}`, newBlog, config);
+  const request = axios.put(`${baseUrl}/${blog.id}`, blog, config);
   return request.then(response => response.data);
 };
 

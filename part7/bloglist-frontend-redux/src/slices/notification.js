@@ -21,4 +21,9 @@ export const setNotification = (message, type, timeout=5) => {
   };
 };
 
-export default notificationSlice.reducer;
+export default {
+  reducer: notificationSlice.reducer,
+  updateNotification,
+  clearNotification,
+  setNotification
+};

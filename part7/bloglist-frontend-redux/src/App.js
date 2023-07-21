@@ -9,7 +9,8 @@ import CreateBlogForm from './components/CreateBlogForm';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
-import { setNotification } from './slices/notification';
+import blogSlice from './slices/blogs';
+import notificationSlice from './slices/notification';
 
 const Togglable = forwardRef((props, refs) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -79,14 +80,13 @@ const LoginForm = (props) => {
 
 
 const App = () => {
+  const blogs = useSelector(({ blogs }) => [...blogs] || []);
   const errorMessage = useSelector(({ notification }) => notification.type === 'error' ? notification.message : '');
   const successMessage = useSelector(({ notification }) => notification.type === 'success' ? notification.message : '');
 
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  const [blogs, setBlogs] = useState([]);
 
   const blogFormRef = useRef();
 
@@ -99,11 +99,11 @@ const App = () => {
     }
   }, []);
 
+  const dispatch = useDispatch();
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs || []));
+    dispatch(blogSlice.initializeBlogs());
   }, []);
 
-  const dispatch = useDispatch();
   const login = async (e) => {
     e.preventDefault();
 
@@ -119,7 +119,7 @@ const App = () => {
       setPassword('');
     } catch (err) {
       console.error(err);
-      dispatch(setNotification('Wrong username or password', 'error'));
+      dispatch(notificationSlice.setNotification('Wrong username or password', 'error'));
     }
   };
 
@@ -130,32 +130,29 @@ const App = () => {
 
   const createBlog = async (newBlog) => {
     try {
-      const createdBlog = await blogService.create(newBlog);
-      createdBlog.user = user;
+      dispatch(blogSlice.createBlog(newBlog, user));
 
       blogFormRef.current.toggleVisibility();
 
-      setBlogs(blogs.concat(createdBlog));
-      dispatch(setNotification(`Added ${createdBlog.title} by ${createdBlog.author}`, 'success'));
+      dispatch(notificationSlice.setNotification(`Added ${newBlog.title} by ${newBlog.author}`, 'success'));
     } catch (err) {
       console.error(err);
-      dispatch(setNotification('Failed to create blog', 'error'));
+      dispatch(notificationSlice.setNotification('Failed to create blog', 'error'));
     }
   };
 
-  const likeBlog = async (id, blog) => {
+  const likeBlog = async blog => {
     try {
       const likedBlog = {
         ...blog,
         likes: blog.likes + 1
       };
 
-      await blogService.update(id, likedBlog);
-      setBlogs(blogs.map(b => b.id === id ? likedBlog : b));
-      dispatch(setNotification(`Liked ${blog.title} by ${blog.author}`, 'success'));
+      dispatch(blogSlice.updateBlog(likedBlog));
+      dispatch(notificationSlice.setNotification(`Liked ${likedBlog.title} by ${likedBlog.author}`, 'success'));
     } catch (err) {
       console.error(err);
-      dispatch(setNotification('Failed to like blog', 'error'));
+      dispatch(notificationSlice.setNotification('Failed to like blog', 'error'));
     }
   };
 
@@ -164,12 +161,11 @@ const App = () => {
       const isConfirmed = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
       if (!isConfirmed) return;
 
-      await blogService.remove(id);
-      setBlogs(blogs.filter(b => b.id !== id));
-      dispatch(setNotification(`Removed ${blog.title} by ${blog.author}`, 'success'));
+      dispatch(blogSlice.deleteBlog(id));
+      dispatch(notificationSlice.setNotification(`Removed ${blog.title} by ${blog.author}`, 'success'));
     } catch (err) {
       console.error(err);
-      dispatch(setNotification('Failed to remove blog', 'error'));
+      dispatch(notificationSlice.setNotification('Failed to remove blog', 'error'));
     }
   };
 

@@ -6,11 +6,13 @@ import ReactDOM from 'react-dom/client';
 
 import App from './App';
 
-import notificationReducer from './slices/notification';
+import blogSlice from './slices/blogs';
+import notificationSlice from './slices/notification';
 
 const store = configureStore({
   reducer: {
-    notification: notificationReducer
+    blogs: blogSlice.reducer,
+    notification: notificationSlice.reducer
   }
 });
 
