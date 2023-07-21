@@ -13,13 +13,13 @@ const Blog = ({ user, blog, likeBlog, removeBlog }) => {
       >
         <span>{blog.url}</span>
         <div style={{ display: 'flex' }}>
-          <span>{blog.likes} likes</span>&nbsp;<button type='button' onClick={() => likeBlog(blog.id, blog)}>Like</button>
+          <span>{blog.likes} likes</span>&nbsp;<button type='button' onClick={() => likeBlog(blog)}>Like</button>
         </div>
         {(blog.user && blog.user.name)
           ? <span>
             Added by {blog.user.name}&nbsp;
             {blog.user.id === user.id
-              && <button type='button' onClick={() => removeBlog(blog.id, blog)}>Remove</button>}
+              && <button type='button' onClick={() => removeBlog(blog)}>Remove</button>}
           </span>
           : null
         }

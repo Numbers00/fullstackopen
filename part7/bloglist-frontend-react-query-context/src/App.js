@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { forwardRef, useEffect, useRef, useState, useImperativeHandle } from 'react';
 
@@ -76,18 +77,56 @@ const LoginForm = (props) => {
   );
 };
 
+const Blogs = (props) => {
+  const { user, blogsRes, likeBlog, removeBlog } = props;
+
+  if (blogsRes.isLoading) return <div>Loading blogs...</div>;
+  else if (blogsRes.isError) return <div>Failed to load blogs</div>;
+
+  const blogs = blogsRes.data;
+  return (
+    <div style={{ marginBottom: 8 }}>
+      {blogs.sort((a, b) => b.likes - a.likes).map((blog, i) =>
+        <Blog key={i} user={user} blog={blog} likeBlog={likeBlog} removeBlog={removeBlog} />
+      )}
+    </div>
+  );
+};
+
 
 const App = () => {
-  const errorMessage = useNotificationValue().type === 'error' ? useNotificationValue().message : '';
-  const successMessage = useNotificationValue().type === 'success' ? useNotificationValue().message : '';
+  const notification = useNotificationValue();
+  const errorMessage = notification.type === 'error' ? notification.message : null;
+  const successMessage = notification.type === 'success' ? notification.message : null;
 
   const setNotification = useSetNotification();
+
+  const queryClient = useQueryClient();
+  const blogsRes = useQuery('blogs', blogService.getAll);
+  const createdBlogMutation = useMutation(blogService.create, {
+    onSuccess: (res, createdBlog) => {
+      createdBlog.user = user;
+      const blogs = queryClient.getQueryData('blogs');
+      queryClient.setQueryData('blogs', blogs.concat(createdBlog));
+    }
+  });
+  const likedBlogMutation = useMutation(blogService.update, {
+    onSuccess: (res, updatedBlog) => {
+      const blogs = queryClient.getQueryData('blogs');
+      const updatedBlogs = blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b);
+      queryClient.setQueryData('blogs', updatedBlogs);
+    }
+  });
+  const removedBlogMutation = useMutation(blogService.remove, {
+    onSuccess: (res, removedBlog) => {
+      const blogs = queryClient.getQueryData('blogs');
+      queryClient.setQueryData('blogs', blogs.filter(b => b.id !== removedBlog.id));
+    }
+  });
 
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
-  const [blogs, setBlogs] = useState([]);
 
   const blogFormRef = useRef();
 
@@ -98,10 +137,6 @@ const App = () => {
       setUser(user.user);
       blogService.setToken(user.token);
     }
-  }, []);
-
-  useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs || []));
   }, []);
 
   const login = async (e) => {
@@ -130,28 +165,25 @@ const App = () => {
 
   const createBlog = async (newBlog) => {
     try {
-      const createdBlog = await blogService.create(newBlog);
-      createdBlog.user = user;
+      createdBlogMutation.mutate(newBlog);
 
       blogFormRef.current.toggleVisibility();
 
-      setBlogs(blogs.concat(createdBlog));
-      setNotification(`Added ${createdBlog.title} by ${createdBlog.author}`, 'success');
+      setNotification(`Added ${newBlog.title} by ${newBlog.author}`, 'success');
     } catch (err) {
       console.error(err);
       setNotification('Failed to create blog', 'error');
     }
   };
 
-  const likeBlog = async (id, blog) => {
+  const likeBlog = async blog => {
     try {
       const likedBlog = {
         ...blog,
         likes: blog.likes + 1
       };
 
-      await blogService.update(id, likedBlog);
-      setBlogs(blogs.map(b => b.id === id ? likedBlog : b));
+      likedBlogMutation.mutate(likedBlog);
       setNotification(`Liked ${likedBlog.title} by ${likedBlog.author}`, 'success');
     } catch (err) {
       console.error(err);
@@ -159,13 +191,12 @@ const App = () => {
     }
   };
 
-  const removeBlog = async (id, blog) => {
+  const removeBlog = async blog => {
     try {
       const isConfirmed = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
       if (!isConfirmed) return;
 
-      await blogService.remove(id);
-      setBlogs(blogs.filter(b => b.id !== id));
+      removedBlogMutation.mutate(blog);
       setNotification(`Removed ${blog.title} by ${blog.author}`, 'success');
     } catch (err) {
       console.error(err);
@@ -200,11 +231,12 @@ const App = () => {
           createBlog={createBlog}
         />
       </Togglable>
-      <div style={{ marginBottom: 8 }}>
-        {blogs.sort((a, b) => b.likes - a.likes).map(blog =>
-          <Blog key={blog.id} user={user} blog={blog} likeBlog={likeBlog} removeBlog={removeBlog} />
-        )}
-      </div>
+      <Blogs
+        user={user}
+        blogsRes={blogsRes}
+        likeBlog={likeBlog}
+        removeBlog={removeBlog}
+      />
     </div>
   );
 };
