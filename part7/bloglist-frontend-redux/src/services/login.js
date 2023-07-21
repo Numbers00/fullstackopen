@@ -1,10 +1,9 @@
 import axios from 'axios';
 const baseUrl = '/api/login';
 
-const login = async credentials => {
-  const response = await axios.post(baseUrl, credentials);
-  window.localStorage.setItem('loggedBlogappUser', JSON.stringify(response.data));
-  return response.data;
+const login = credentials => {
+  const req = axios.post(baseUrl, credentials);
+  return req.then(res => res.data);
 };
 
 export default { login };

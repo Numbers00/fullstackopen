@@ -6,9 +6,7 @@ import { forwardRef, useEffect, useRef, useState, useImperativeHandle } from 're
 import Blog from './components/Blog';
 import CreateBlogForm from './components/CreateBlogForm';
 
-import blogService from './services/blogs';
-import loginService from './services/login';
-
+import authSlice from './slices/auth';
 import blogSlice from './slices/blogs';
 import notificationSlice from './slices/notification';
 
@@ -83,20 +81,23 @@ const App = () => {
   const blogs = useSelector(({ blogs }) => [...blogs] || []);
   const errorMessage = useSelector(({ notification }) => notification.type === 'error' ? notification.message : '');
   const successMessage = useSelector(({ notification }) => notification.type === 'success' ? notification.message : '');
+  const user = useSelector(({ auth }) => auth.user);
 
-  const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const blogFormRef = useRef();
 
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user.user);
-      blogService.setToken(user.token);
+  const initializeAuth = async () => {
+    try {
+      await dispatch(authSlice.initializeAuth());
+    } catch (err) {
+      console.error(err);
     }
+  };
+
+  useEffect(() => {
+    initializeAuth();
   }, []);
 
   const dispatch = useDispatch();
@@ -108,13 +109,8 @@ const App = () => {
     e.preventDefault();
 
     try {
-      const user = await loginService.login({
-        username, password
-      });
+      await dispatch(authSlice.login(username, password));
 
-      blogService.setToken(user.token);
-
-      setUser(user.user);
       setUsername('');
       setPassword('');
     } catch (err) {
@@ -124,13 +120,12 @@ const App = () => {
   };
 
   const logout = () => {
-    window.localStorage.removeItem('loggedBlogappUser');
-    setUser(null);
+    dispatch(authSlice.logout());
   };
 
   const createBlog = async (newBlog) => {
     try {
-      dispatch(blogSlice.createBlog(newBlog, user));
+      await dispatch(blogSlice.createBlog(newBlog, user));
 
       blogFormRef.current.toggleVisibility();
 
@@ -148,7 +143,7 @@ const App = () => {
         likes: blog.likes + 1
       };
 
-      dispatch(blogSlice.updateBlog(likedBlog));
+      await dispatch(blogSlice.updateBlog(likedBlog));
       dispatch(notificationSlice.setNotification(`Liked ${likedBlog.title} by ${likedBlog.author}`, 'success'));
     } catch (err) {
       console.error(err);
@@ -161,7 +156,7 @@ const App = () => {
       const isConfirmed = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
       if (!isConfirmed) return;
 
-      dispatch(blogSlice.deleteBlog(id));
+      await dispatch(blogSlice.deleteBlog(id));
       dispatch(notificationSlice.setNotification(`Removed ${blog.title} by ${blog.author}`, 'success'));
     } catch (err) {
       console.error(err);

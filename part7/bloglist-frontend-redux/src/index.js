@@ -6,11 +6,13 @@ import ReactDOM from 'react-dom/client';
 
 import App from './App';
 
+import authSlice from './slices/auth';
 import blogSlice from './slices/blogs';
 import notificationSlice from './slices/notification';
 
 const store = configureStore({
   reducer: {
+    auth: authSlice.reducer,
     blogs: blogSlice.reducer,
     notification: notificationSlice.reducer
   }
