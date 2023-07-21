@@ -88,6 +88,7 @@ const App = () => {
 
   const blogFormRef = useRef();
 
+  const dispatch = useDispatch();
   const initializeAuth = async () => {
     try {
       await dispatch(authSlice.initializeAuth());
@@ -100,7 +101,6 @@ const App = () => {
     initializeAuth();
   }, []);
 
-  const dispatch = useDispatch();
   useEffect(() => {
     dispatch(blogSlice.initializeBlogs());
   }, []);

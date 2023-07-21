@@ -8,6 +8,7 @@ import CreateBlogForm from './components/CreateBlogForm';
 import blogService from './services/blogs';
 import loginService from './services/login';
 
+import { useNotificationValue, useSetNotification } from './contexts/NotificationContext';
 
 const Togglable = forwardRef((props, refs) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -77,13 +78,16 @@ const LoginForm = (props) => {
 
 
 const App = () => {
+  const errorMessage = useNotificationValue().type === 'error' ? useNotificationValue().message : '';
+  const successMessage = useNotificationValue().type === 'success' ? useNotificationValue().message : '';
+
+  const setNotification = useSetNotification();
+
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const [blogs, setBlogs] = useState([]);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
 
   const blogFormRef = useRef();
 
@@ -115,8 +119,7 @@ const App = () => {
       setPassword('');
     } catch (err) {
       console.error(err);
-      setErrorMessage('Wrong username or password');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setNotification('Wrong username or password', 'error');
     }
   };
 
@@ -133,12 +136,10 @@ const App = () => {
       blogFormRef.current.toggleVisibility();
 
       setBlogs(blogs.concat(createdBlog));
-      setSuccessMessage(`Added ${createdBlog.title} by ${createdBlog.author}`);
-      setTimeout(() => setSuccessMessage(null), 5000);
+      setNotification(`Added ${createdBlog.title} by ${createdBlog.author}`, 'success');
     } catch (err) {
       console.error(err);
-      setErrorMessage('Failed to create blog');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setNotification('Failed to create blog', 'error');
     }
   };
 
@@ -151,10 +152,10 @@ const App = () => {
 
       await blogService.update(id, likedBlog);
       setBlogs(blogs.map(b => b.id === id ? likedBlog : b));
+      setNotification(`Liked ${likedBlog.title} by ${likedBlog.author}`, 'success');
     } catch (err) {
       console.error(err);
-      setErrorMessage('Failed to like blog');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setNotification('Failed to like blog', 'error');
     }
   };
 
@@ -165,10 +166,10 @@ const App = () => {
 
       await blogService.remove(id);
       setBlogs(blogs.filter(b => b.id !== id));
+      setNotification(`Removed ${blog.title} by ${blog.author}`, 'success');
     } catch (err) {
       console.error(err);
-      setErrorMessage('Failed to remove blog');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setNotification('Failed to remove blog', 'error');
     }
   };
 
