@@ -7,8 +7,8 @@ import Blog from './components/Blog';
 import CreateBlogForm from './components/CreateBlogForm';
 
 import blogService from './services/blogs';
-import loginService from './services/login';
 
+import { useAuthValue, useInitializeAuth, useLogin, useLogout } from './contexts/AuthContext';
 import { useNotificationValue, useSetNotification } from './contexts/NotificationContext';
 
 const Togglable = forwardRef((props, refs) => {
@@ -47,13 +47,13 @@ Togglable.displayName = 'Togglable';
 
 const LoginForm = (props) => {
   const {
-    login,
+    handleLogin,
     username, setUsername,
     password, setPassword,
   } = props;
 
   return (
-    <form onSubmit={login}>
+    <form onSubmit={handleLogin}>
       <div style={{ display: 'flex', marginBottom: 8 }}>
         <label htmlFor='usernameInput'>username</label>&nbsp;
         <input
@@ -99,8 +99,6 @@ const App = () => {
   const errorMessage = notification.type === 'error' ? notification.message : null;
   const successMessage = notification.type === 'success' ? notification.message : null;
 
-  const setNotification = useSetNotification();
-
   const queryClient = useQueryClient();
   const blogsRes = useQuery('blogs', blogService.getAll);
   const createdBlogMutation = useMutation(blogService.create, {
@@ -124,32 +122,25 @@ const App = () => {
     }
   });
 
-  const [user, setUser] = useState(null);
+  const { user } = useAuthValue();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const blogFormRef = useRef();
 
+  const initializeAuth = useInitializeAuth();
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser');
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON);
-      setUser(user.user);
-      blogService.setToken(user.token);
-    }
+    initializeAuth();
   }, []);
 
-  const login = async (e) => {
+  const setNotification = useSetNotification();
+  const login = useLogin();
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const user = await loginService.login({
-        username, password
-      });
-
-      blogService.setToken(user.token);
-
-      setUser(user.user);
+      await login(username, password);
       setUsername('');
       setPassword('');
     } catch (err) {
@@ -158,9 +149,9 @@ const App = () => {
     }
   };
 
-  const logout = () => {
-    window.localStorage.removeItem('loggedBlogappUser');
-    setUser(null);
+  const logout = useLogout();
+  const handleLogout = () => {
+    logout();
   };
 
   const createBlog = async (newBlog) => {
@@ -210,7 +201,7 @@ const App = () => {
         <h2>Log in to application</h2>
         { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
         <LoginForm
-          login={login}
+          handleLogin={handleLogin}
           username={username} setUsername={setUsername}
           password={password} setPassword={setPassword}
         />
@@ -222,7 +213,7 @@ const App = () => {
     <div>
       <h2>blogs</h2>
       <p>
-        {user.name} logged in <button type='button' onClick={logout}>Logout</button>
+        {user.name} logged in <button type='button' onClick={handleLogout}>Logout</button>
       </p>
       { successMessage && <span style={{ color: 'green' }}>{successMessage}</span> }
       { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
