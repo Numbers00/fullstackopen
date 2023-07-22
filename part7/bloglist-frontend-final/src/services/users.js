@@ -9,7 +9,7 @@ const getAll = () => {
 };
 
 const get = id => {
-  const req = axios.get(`${baseUrl}/${JSON.stringify(id)}`);
+  const req = axios.get(`${baseUrl}/${id}`);
   return req.then(res => res.data);
 };
 

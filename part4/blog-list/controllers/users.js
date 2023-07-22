@@ -22,8 +22,7 @@ usersRouter.get('/:id', async (request, response) => {
       .findById(request.params.id)
       .populate({
         path: 'blogs',
-        select: 'title author url likes',
-        populate: { path: 'user', select: 'username name' },
+        select: 'title author url likes user'
       });
     if (!user) return response.status(404).end();
     response.json(user);

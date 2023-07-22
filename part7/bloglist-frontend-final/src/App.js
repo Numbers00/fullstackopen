@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import Blogs from './views/Blogs';
 import Login from './views/Login';
+import User from './views/User';
 import Users from './views/Users';
 
 import { useAuthValue, useInitializeAuth } from './contexts/AuthContext';
@@ -20,24 +21,12 @@ const App = () => {
     initializeAuth();
   }, []);
 
-  if (!user) {
+  if (!user)
     return (
       <div>
         <h2>Log in to application</h2>
         { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
         <Login />
-      </div>
-    );
-  }
-
-  if (!user)
-    return (
-      <div>
-        <h2>blogs</h2>
-        <Routes>
-          <Route path='*' element={<Login />} />
-        </Routes>
-        <Blogs />
       </div>
     );
 
@@ -48,6 +37,7 @@ const App = () => {
         <Route index element={<Blogs />} />
         <Route path='/blogs' element={<Blogs />} />
         <Route path='/users' element={<Users />} />
+        <Route path='/users/:id' element={<User />} />
         <Route path='*' element={<Blogs />} />
       </Routes>
     </div>

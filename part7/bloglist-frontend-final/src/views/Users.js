@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import Header from '../components/Header';
 
 import { useUsersQuery } from '../hooks';
@@ -20,7 +22,9 @@ const UsersTable = () => {
       <tbody>
         {users.map((u, i) => (
           <tr key={i}>
-            <td>{u.name}</td>
+            <Link to={`/users/${u.id}`}>
+              <td>{u.name}</td>
+            </Link>
             <td>{u.blogs.length}</td>
           </tr>
         ))}
