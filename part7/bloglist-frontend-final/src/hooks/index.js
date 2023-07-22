@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
+import { useState } from 'react';
+
 import blogService from '../services/blogs';
 import userService from '../services/users';
 
@@ -12,10 +14,10 @@ export const useBlogQuery = id => useQuery(['blogs', id], () => blogService.get(
 export const useBlogMutations = () => {
   const queryClient = useQueryClient();
 
-  const createdBlogMutation = useMutation(blogService.create, {
+  const createBlogMutation = useMutation(blogService.create, {
     onSuccess: (res, createdBlog) => {
       const blogs = queryClient.getQueryData('blogs');
-      queryClient.setQueryData('blogs', blogs.concat(createdBlog));
+      if (blogs) queryClient.setQueryData('blogs', blogs.concat(createdBlog));
     },
     onError: err => {
       const setNotification = useSetNotification();
@@ -24,13 +26,36 @@ export const useBlogMutations = () => {
     }
   });
 
-  const likedBlogMutation = useMutation(blogService.update, {
+  const addBlogCommentMutation = useMutation(({ id, comment }) => blogService.addComment(id, comment), {
+    onSuccess: res => {
+      const blogs = queryClient.getQueryData('blogs');
+      const updatedBlog = res;
+      if (blogs) {
+        const updatedBlogs = blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b);
+        queryClient.setQueryData('blogs', updatedBlogs);
+      }
+
+      const blog = queryClient.getQueryData(['blogs', updatedBlog.id]);
+      queryClient.setQueryData(['blogs', updatedBlog.id], {
+        ...blog,
+        comments: updatedBlog.comments
+      });
+    }
+  });
+
+  const likeBlogMutation = useMutation(blogService.update, {
     onSuccess: (res, updatedBlog) => {
       const blogs = queryClient.getQueryData('blogs');
-      const updatedBlogs = blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b);
-      queryClient.setQueryData('blogs', updatedBlogs);
+      if (blogs) {
+        const updatedBlogs = blogs.map(b => b.id === updatedBlog.id ? updatedBlog : b);
+        queryClient.setQueryData('blogs', updatedBlogs);
+      }
 
-      queryClient.setQueryData(['blogs', updatedBlog.id], updatedBlog);
+      const blog = queryClient.getQueryData(['blogs', updatedBlog.id]);
+      queryClient.setQueryData(['blogs', updatedBlog.id], {
+        ...blog,
+        likes: updatedBlog.likes
+      });
     },
     onError: err => {
       const setNotification = useSetNotification();
@@ -39,10 +64,10 @@ export const useBlogMutations = () => {
     }
   });
 
-  const removedBlogMutation = useMutation(blogService.remove, {
+  const removeBlogMutation = useMutation(blogService.remove, {
     onSuccess: (res, removedBlog) => {
       const blogs = queryClient.getQueryData('blogs');
-      queryClient.setQueryData('blogs', blogs.filter(b => b.id !== removedBlog.id));
+      if (blogs) queryClient.setQueryData('blogs', blogs.filter(b => b.id !== removedBlog.id));
     },
     onError: err => {
       const setNotification = useSetNotification();
@@ -51,7 +76,22 @@ export const useBlogMutations = () => {
     }
   });
 
-  return { createdBlogMutation, likedBlogMutation, removedBlogMutation };
+  return { createBlogMutation, addBlogCommentMutation, likeBlogMutation, removeBlogMutation };
+};
+
+export const useField = (type) => {
+  const [value, setValue] = useState('');
+
+  const onChange = (e) => setValue(e.target.value);
+
+  const reset = () => setValue('');
+
+  return {
+    type,
+    value,
+    onChange,
+    reset
+  };
 };
 
 export const useUsersQuery = () => useQuery('users', userService.getAll);

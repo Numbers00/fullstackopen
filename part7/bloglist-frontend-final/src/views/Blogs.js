@@ -36,12 +36,12 @@ const Blogs = () => {
 
   const blogsRes = useBlogsQuery();
 
-  const { createdBlogMutation } = useBlogMutations();
+  const { createBlogMutation } = useBlogMutations();
 
   const setNotification = useSetNotification();
   const createBlog = async (newBlog) => {
     try {
-      createdBlogMutation.mutate(newBlog);
+      createBlogMutation.mutate(newBlog);
 
       blogFormRef.current.toggleVisibility();
 

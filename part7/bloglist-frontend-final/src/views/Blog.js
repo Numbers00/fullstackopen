@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuthValue } from '../contexts/AuthContext';
 
-import { useBlogQuery, useBlogMutations } from '../hooks';
+import { useBlogQuery, useBlogMutations, useField } from '../hooks';
 
 
 const Blog = () => {
@@ -11,15 +11,30 @@ const Blog = () => {
   const { user } = useAuthValue();
 
   const blogRes = useBlogQuery(blogId);
+  const blog = blogRes.data;
 
-  const { likedBlogMutation, removedBlogMutation } = useBlogMutations();
+  const { reset: resetComment, ...comment } = useField('text');
+
+  const { addBlogCommentMutation, likeBlogMutation, removeBlogMutation } = useBlogMutations();
+  const addBlogComment = e => {
+    e.preventDefault();
+
+    if (!comment.value) return;
+
+    addBlogCommentMutation.mutate({ id: blog.id, comment: comment.value }, {
+      onSuccess: () => {
+        resetComment();
+      }
+    });
+  };
+
   const likeBlog = blog => {
     const likedBlog = {
       ...blog,
       likes: blog.likes + 1
     };
 
-    likedBlogMutation.mutate(likedBlog);
+    likeBlogMutation.mutate(likedBlog);
   };
 
   const navigate = useNavigate();
@@ -27,7 +42,7 @@ const Blog = () => {
     const isConfirmed = window.confirm(`Remove blog ${blog.title} by ${blog.author}?`);
     if (!isConfirmed) return;
 
-    removedBlogMutation.mutate(blog, {
+    removeBlogMutation.mutate(blog, {
       onSuccess: () => {
         navigate('/blogs');
       }
@@ -37,8 +52,6 @@ const Blog = () => {
   if (blogRes.isLoading) return <div>Loading blog...</div>;
   else if (blogRes.isError) return <div>Failed to load blog</div>;
 
-  const blog = blogRes.data;
-  console.log('blog', blog);
   return (
     <div>
       <h2>{blog.title} by {blog.author}</h2>
@@ -59,6 +72,10 @@ const Blog = () => {
           }
         </span>
         <h3>comments</h3>
+        <form onSubmit={addBlogComment}>
+          <input {...comment} style={{ marginRight: 8 }} />
+          <button type='submit'>add comment</button>
+        </form>
         <ul>
           {blog.comments && blog.comments.map((c, i) => (
             <li key={i}>{c}</li>

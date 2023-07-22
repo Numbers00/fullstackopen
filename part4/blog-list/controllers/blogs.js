@@ -58,11 +58,12 @@ blogsRouter.post('/', middleware.userExtractor, async (req, res) => {
 blogsRouter.post('/:id/comments', middleware.userExtractor, async (req, res) => {
   try {
     const body = req.body;
-    if (!(body instanceof String && body.length))
+    if (!body.comment || typeof body.comment !== 'string')
       return res.status(400).end();
     
+    const comment = body.comment;
     const blog = await Blog.findById(req.params.id);
-    blog.comments = [...blog.comments, body];
+    blog.comments = [...blog.comments, comment];
     await blog.save();
 
     res.status(201).json(blog);

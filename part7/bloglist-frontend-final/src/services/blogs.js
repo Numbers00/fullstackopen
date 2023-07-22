@@ -28,6 +28,15 @@ const create = blog => {
   return req.then(res => res.data);
 };
 
+const addComment = (blogId, comment) => {
+  const config = {
+    headers: { Authorization: token },
+  };
+
+  const req = axios.post(`${baseUrl}/${blogId}/comments`, { comment }, config);
+  return req.then(res => res.data);
+};
+
 const update = async blog => {
   const config = {
     headers: { Authorization: token },
@@ -46,4 +55,4 @@ const remove = async blog => {
   return req.then(res => res.data);
 };
 
-export default { setToken, getAll, get, create, update, remove };
+export default { setToken, getAll, get, create, addComment, update, remove };
