@@ -4,38 +4,38 @@ const Blog = require('../models/blog.js');
 
 const middleware = require('../utils/middleware.js');
 
-blogsRouter.get('/', async (request, response) => {
+blogsRouter.get('/', async (req, res) => {
   try {
     const blogs = await Blog
       .find({})
       .populate('user', { id: 1, username: 1, name: 1 });
-    response.json(blogs);
+    res.json(blogs);
   } catch (err) {
     console.log(err);
-    response.status(500).end();
+    res.status(500).end();
   }
 });
 
-blogsRouter.get('/:id', async (request, response) => {
+blogsRouter.get('/:id', async (req, res) => {
   try {
     const blog = await Blog
-      .findById(request.params.id)
+      .findById(req.params.id)
       .populate('user', { id: 1, username: 1, name: 1 });
-    response.json(blog);
+    res.json(blog);
   } catch (err) {
     console.log(err);
-    response.status(500).end();
+    res.status(500).end();
   }
 });
 
-blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
+blogsRouter.post('/', middleware.userExtractor, async (req, res) => {
   try {
-    const body = request.body;
+    const body = req.body;
     if (!('title' in body) || !('url' in body)) {
-      return response.status(400).end();
+      return res.status(400).end();
     }
 
-    const user = request.user;
+    const user = req.user;
 
     const blog = new Blog({
       'title': body.title,
@@ -48,18 +48,35 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
     user.blogs = user.blogs.concat(savedBlog.id);
     await user.save();
 
-    response.status(201).json(savedBlog);
+    res.status(201).json(savedBlog);
   } catch (err) {
     console.log(err);
-    response.status(500).end();
+    res.status(500).end();
   }
 });
 
-blogsRouter.put('/:id', middleware.userExtractor, async (request, response) => {
+blogsRouter.post('/:id/comments', middleware.userExtractor, async (req, res) => {
   try {
-    const body = request.body;
+    const body = req.body;
+    if (!(body instanceof String && body.length))
+      return res.status(400).end();
+    
+    const blog = await Blog.findById(req.params.id);
+    blog.comments = [...blog.comments, body];
+    await blog.save();
+
+    res.status(201).json(blog);
+  } catch (err) {
+    console.log(err);
+    res.status(500).end();
+  }
+});
+
+blogsRouter.put('/:id', middleware.userExtractor, async (req, res) => {
+  try {
+    const body = req.body;
     if (!('title' in body) || !('url' in body)) {
-      return response.status(400).end();
+      return res.status(400).end();
     }
 
     const blog = {
@@ -69,29 +86,29 @@ blogsRouter.put('/:id', middleware.userExtractor, async (request, response) => {
       'likes': body.likes
     };
     await Blog.findByIdAndUpdate(
-      request.params.id,
+      req.params.id,
       blog,
       { new: true, runValidators: true, context: 'query' }
     );
-    response.status(200).json(blog);
+    res.status(200).json(blog);
   } catch (err) {
     console.log(err);
-    response.status(500).end();
+    res.status(500).end();
   }
 });
 
-blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
+blogsRouter.delete('/:id', middleware.userExtractor, async (req, res) => {
   try {
-    const blog = await Blog.findById(request.params.id);
-    if (blog.user.toString() != request.user.id.toString()) {
-      return response.status(401).json({ error: 'you are not authorized to delete this blog' });
+    const blog = await Blog.findById(req.params.id);
+    if (blog.user.toString() != req.user.id.toString()) {
+      return res.status(401).json({ error: 'you are not authorized to delete this blog' });
     }
 
-    await Blog.findByIdAndDelete(request.params.id);
-    response.status(204).end();
+    await Blog.findByIdAndDelete(req.params.id);
+    res.status(204).end();
   }  catch (err) {
     console.log(err);
-    response.status(500).end();
+    res.status(500).end();
   }
 });
 

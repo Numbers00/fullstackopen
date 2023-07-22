@@ -38,6 +38,7 @@ const Blog = () => {
   else if (blogRes.isError) return <div>Failed to load blog</div>;
 
   const blog = blogRes.data;
+  console.log('blog', blog);
   return (
     <div>
       <h2>{blog.title} by {blog.author}</h2>
@@ -57,6 +58,12 @@ const Blog = () => {
             </button>
           }
         </span>
+        <h3>comments</h3>
+        <ul>
+          {blog.comments && blog.comments.map((c, i) => (
+            <li key={i}>{c}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );
