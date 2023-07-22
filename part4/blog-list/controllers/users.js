@@ -5,9 +5,32 @@ const usersRouter = require('express').Router();
 const User = require('../models/user.js');
 
 usersRouter.get('/', async (request, response) => {
-  const users = await User
-    .find({}).populate('blogs', { title: 1, author: 1, url: 1, likes: 1 });
-  response.json(users);
+  try {
+    const users = await User
+      .find({})
+      .populate('blogs', { title: 1, author: 1, url: 1, likes: 1 });
+    response.json(users);
+  } catch (err) {
+    console.error(err);
+    response.status(500).end();
+  }
+});
+
+usersRouter.get('/:id', async (request, response) => {
+  try {
+    const user = await User
+      .findById(request.params.id)
+      .populate({
+        path: 'blogs',
+        select: 'title author url likes',
+        populate: { path: 'user', select: 'username name' },
+      });
+    if (!user) return response.status(404).end();
+    response.json(user);
+  } catch (err) {
+    console.error(err);
+    response.status(500).end();
+  }
 });
 
 usersRouter.post('/', async (request, response) => {
