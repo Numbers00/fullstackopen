@@ -28,6 +28,7 @@ const Header = () => {
   return (
     <div>
       <TopNav />
+      <h2>blogs</h2>
       <p>
         {user.name} logged in <button type='button' onClick={handleLogout}>Logout</button>
       </p>

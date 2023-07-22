@@ -1,16 +1,15 @@
 import { useParams } from 'react-router-dom';
 
-import Header from '../components/Header';
-
 import { useUserQuery } from '../hooks';
 
-const UserContents = () => {
+
+const User = () => {
   const { id: userId } = useParams();
 
   const userRes = useUserQuery(userId);
 
   if (userRes.isLoading) return <div>Loading user...</div>;
-  if (userRes.isError) return <div>Failed to load user</div>;
+  else if (userRes.isError) return <div>Failed to load user</div>;
 
   const user = userRes.data;
   return (
@@ -22,16 +21,6 @@ const UserContents = () => {
           <li key={i}>{b.title}</li>
         ))}
       </ul>
-    </div>
-  );
-};
-
-const User = () => {
-
-  return (
-    <div>
-      <Header />
-      <UserContents />
     </div>
   );
 };
