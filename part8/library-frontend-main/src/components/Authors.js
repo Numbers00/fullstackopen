@@ -1,17 +1,32 @@
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 
-import { ALL_AUTHORS } from '../requests';
+import { useField } from '../hooks';
+
+import { ALL_AUTHORS, UPDATE_BIRTHYEAR } from '../requests';
 
 
 const Authors = (props) => {
   const authorsRes = useQuery(ALL_AUTHORS);
+  const authors = authorsRes.data?.allAuthors;
+
+  const [updateBirthyear] = useMutation(UPDATE_BIRTHYEAR, {
+    refetchQueries: [{ query: ALL_AUTHORS }]
+  });
+
+  const { reset: resetName, ...name } = useField('text');
+  const { reset: resetBirthyear, ...birthyear } = useField('number');
+  const changeBirthyear = e => {
+    e.preventDefault();
+    updateBirthyear({ variables: { name: name.value, setBornTo: parseInt(birthyear.value) } });
+    resetName();
+    resetBirthyear();
+  };
   
   if (!props.show)
     return null
   else if (authorsRes.loading)
     return <div>loading authors...</div>
 
-  const authors = authorsRes.data.allAuthors;
   return (
     <div>
       <h2>authors</h2>
@@ -31,6 +46,18 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
+      <h3>Set birthyear</h3>
+      <form onSubmit={changeBirthyear}>
+        <div style={{ display: 'flex', marginBottom: 12 }}>
+          <label htmlFor='nameInput' style={{ marginRight: 8 }}>name</label>
+          <input id='nameInput' {...name} />
+        </div>
+        <div style={{ display: 'flex', marginBottom: 12 }}>
+          <label htmlFor='birthyearInput' style={{ marginRight: 8 }}>born</label>
+          <input id='birthyearInput' {...birthyear} />
+        </div>
+        <button type='submit'>Update Author</button>
+      </form>
     </div>
   );
 };
