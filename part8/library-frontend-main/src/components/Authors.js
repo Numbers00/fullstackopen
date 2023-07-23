@@ -49,8 +49,14 @@ const Authors = (props) => {
       <h3>Set birthyear</h3>
       <form onSubmit={changeBirthyear}>
         <div style={{ display: 'flex', marginBottom: 12 }}>
-          <label htmlFor='nameInput' style={{ marginRight: 8 }}>name</label>
-          <input id='nameInput' {...name} />
+          <label htmlFor='nameSelect' style={{ marginRight: 8 }}>name</label>
+          <select id='nameSelect' value={name.value} onChange={name.onChange}>
+            {authors.map(a => (
+              <option key={a.name} value={a.name}>
+                {a.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div style={{ display: 'flex', marginBottom: 12 }}>
           <label htmlFor='birthyearInput' style={{ marginRight: 8 }}>born</label>
