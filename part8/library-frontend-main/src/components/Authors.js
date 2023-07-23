@@ -9,7 +9,7 @@ const Authors = (props) => {
   
   if (!props.show)
     return null
-  else if (authors.loading)
+  else if (authorsRes.loading)
     return <div>loading authors...</div>
 
   return (
