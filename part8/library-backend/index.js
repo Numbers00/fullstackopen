@@ -1,5 +1,7 @@
 const { ApolloServer } = require('@apollo/server');
 const { startStandaloneServer } = require('@apollo/server/standalone');
+const { GraphQLError } = require('graphql');
+const { v1: uuid } = require('uuid');
 
 let authors = [
   {
@@ -100,8 +102,9 @@ let books = [
 const typeDefs = `
   type Book {
     title: String!
-    author: String!
     published: Int!
+    author: String!
+    id: ID!
     genres: [String!]!
   }
 
@@ -117,6 +120,19 @@ const typeDefs = `
     allBooks(author: String, genre: String): [Book!]!
     authorCount: Int!
     allAuthors: [Author!]!
+  }
+
+  type Mutation {
+    addBook(
+      title: String!,
+      author: String!,
+      published: Int!,
+      genres: [String!]!
+    ): Book
+    editAuthor(
+      name: String!,
+      setBornTo: Int!
+    ): Author
   }
 `;
 
@@ -134,9 +150,36 @@ const resolvers = {
         return books.filter(b => b.author === args.author && b.genres.includes(args.genre));
     },
     authorCount: () => authors.length,
-    allAuthors: () => {
-      return authors.map(a => ({ ...a, bookCount: books.filter(b => b.author === a.name).length }));
+    allAuthors: () => authors,
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      const book = { ...args, id: uuid() };
+      books = books.concat(book);
+      if (!authors.find(a => a.name === args.author))
+        authors = authors.concat({ name: args.author, id: uuid() });
+      
+      return book;
     },
+    editAuthor: (root, args) => {
+      if (args.setBornTo >= (new Date()).getFullYear())
+        throw new GraphQLError('Invalid birth year', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.setBornTo
+          }
+        });
+
+      const author = authors.find(a => a.name === args.name);
+      if (!author) return null;
+
+      const updatedAuthor = { ...author, born: args.setBornTo };
+      authors = authors.map(a => a.name === args.name ? updatedAuthor : a);
+      return updatedAuthor;
+    }
+  },
+  Author: {
+    bookCount: (root) => books.filter(b => b.author === root.name).length
   }
 };
 
