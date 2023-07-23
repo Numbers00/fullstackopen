@@ -1,8 +1,15 @@
+import { Button, Form } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuthValue } from '../contexts/AuthContext';
 
 import { useBlogQuery, useBlogMutations, useField } from '../hooks';
+
+import styled from 'styled-components';
+
+const AddCommentForm = styled(Form)`
+  width: min(100%, 600px);
+`;
 
 
 const Blog = () => {
@@ -53,29 +60,43 @@ const Blog = () => {
   else if (blogRes.isError) return <div>Failed to load blog</div>;
 
   return (
-    <div>
+    <div className='mt-5 ms-5'>
       <h2>{blog.title} by {blog.author}</h2>
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <a href={blog.url} target='_blank' rel='noreferrer'>{blog.url}</a>
-        <span>
+        <p><a href={blog.url} target='_blank' rel='noreferrer'>{blog.url}</a></p>
+        <p>
           {blog.likes} likes&nbsp;
-          <button type='button' onClick={() => likeBlog(blog)}>
+          <Button
+            type='button'
+            variant='primary'
+            onClick={() => likeBlog(blog)}
+          >
             like
-          </button>
-        </span>
-        <span>
+          </Button>
+        </p>
+        <p>
           Added by {blog.user.name}&nbsp;
           {user.id === blog.user.id
-            && <button type='button' onClick={() => removeBlog(blog)}>
+            && <Button
+              type='button'
+              variant='danger'
+              onClick={() => removeBlog(blog)}
+            >
               remove
-            </button>
+            </Button>
           }
-        </span>
+        </p>
         <h3>comments</h3>
-        <form onSubmit={addBlogComment}>
-          <input {...comment} style={{ marginRight: 8 }} />
-          <button type='submit'>add comment</button>
-        </form>
+        <AddCommentForm className='d-flex' onSubmit={addBlogComment}>
+          <Form.Control className='h-100 me-2' {...comment} />
+          <Button
+            type='submit'
+            variant='success'
+            className='flex-shrink-0 h-100'
+          >
+            Add Comment
+          </Button>
+        </AddCommentForm>
         <ul>
           {blog.comments && blog.comments.map((c, i) => (
             <li key={i}>{c}</li>

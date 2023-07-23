@@ -1,3 +1,4 @@
+import { Container } from 'react-bootstrap';
 import { Route, Routes } from 'react-router-dom';
 
 import { useEffect } from 'react';
@@ -11,13 +12,10 @@ import Users from './views/Users';
 import Header from './components/Header';
 
 import { useAuthValue, useInitializeAuth } from './contexts/AuthContext';
-import { useNotificationValue } from './contexts/NotificationContext';
 
 
 const App = () => {
   const { user } = useAuthValue();
-  const notification = useNotificationValue();
-  const errorMessage = notification.type === 'error' ? notification.message : null;
 
   const initializeAuth = useInitializeAuth();
   useEffect(() => {
@@ -26,15 +24,14 @@ const App = () => {
 
   if (!user)
     return (
-      <div>
-        <h2>Log in to application</h2>
-        { errorMessage && <span style={{ color: 'red' }}>{errorMessage}</span> }
+      <Container>
+        <Header />
         <Login />
-      </div>
+      </Container>
     );
 
   return (
-    <div>
+    <Container>
       <Header />
       <Routes>
         <Route index element={<Blogs />} />
@@ -44,7 +41,7 @@ const App = () => {
         <Route path='/users' element={<Users />} />
         <Route path='*' element={<Blogs />} />
       </Routes>
-    </div>
+    </Container>
   );
 };
 

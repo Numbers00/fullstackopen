@@ -14,14 +14,19 @@ export const useBlogQuery = id => useQuery(['blogs', id], () => blogService.get(
 export const useBlogMutations = () => {
   const queryClient = useQueryClient();
 
+  const setNotification = useSetNotification();
+
   const createBlogMutation = useMutation(blogService.create, {
-    onSuccess: (res, createdBlog) => {
+    onSuccess: res => {
+      const createdBlog = res;
       const blogs = queryClient.getQueryData('blogs');
       if (blogs) queryClient.setQueryData('blogs', blogs.concat(createdBlog));
+
+      setNotification('Blog created successfully', 'success');
     },
     onError: err => {
-      const setNotification = useSetNotification();
       console.error(err);
+
       setNotification('Failed to create blog', 'error');
     }
   });
@@ -40,6 +45,13 @@ export const useBlogMutations = () => {
         ...blog,
         comments: updatedBlog.comments
       });
+
+      setNotification('Comment added successfully', 'success');
+    },
+    onError: err => {
+      console.error(err);
+
+      setNotification('Failed to add comment', 'error');
     }
   });
 
@@ -56,10 +68,12 @@ export const useBlogMutations = () => {
         ...blog,
         likes: updatedBlog.likes
       });
+
+      setNotification('Blog liked successfully', 'success');
     },
     onError: err => {
-      const setNotification = useSetNotification();
       console.error(err);
+
       setNotification('Failed to like blog', 'error');
     }
   });
@@ -68,10 +82,12 @@ export const useBlogMutations = () => {
     onSuccess: (res, removedBlog) => {
       const blogs = queryClient.getQueryData('blogs');
       if (blogs) queryClient.setQueryData('blogs', blogs.filter(b => b.id !== removedBlog.id));
+
+      setNotification('Blog removed successfully', 'success');
     },
     onError: err => {
-      const setNotification = useSetNotification();
       console.error(err);
+
       setNotification('Failed to remove blog', 'error');
     }
   });

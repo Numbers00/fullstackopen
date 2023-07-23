@@ -1,6 +1,8 @@
+import { Table } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 import { useUsersQuery } from '../hooks';
+
 
 const UsersTable = () => {
   const usersRes = useUsersQuery();
@@ -10,7 +12,7 @@ const UsersTable = () => {
 
   const users = usersRes.data;
   return (
-    <table>
+    <Table striped>
       <thead>
         <tr>
           <th></th>
@@ -29,14 +31,14 @@ const UsersTable = () => {
           </tr>
         ))}
       </tbody>
-    </table>
+    </Table>
   );
 };
 
 const Users = () => {
 
   return (
-    <div>
+    <div className='mt-5 ms-5'>
       <h2>Users</h2>
       <UsersTable />
     </div>

@@ -5,8 +5,6 @@ import Togglable from '../components/Togglable';
 
 import { useRef } from 'react';
 
-import { useSetNotification } from '../contexts/NotificationContext';
-
 import { useBlogsQuery, useBlogMutations } from '../hooks';
 
 
@@ -38,22 +36,14 @@ const Blogs = () => {
 
   const { createBlogMutation } = useBlogMutations();
 
-  const setNotification = useSetNotification();
   const createBlog = async (newBlog) => {
-    try {
-      createBlogMutation.mutate(newBlog);
+    createBlogMutation.mutate(newBlog);
 
-      blogFormRef.current.toggleVisibility();
-
-      setNotification(`Added ${newBlog.title} by ${newBlog.author}`, 'success');
-    } catch (err) {
-      console.error(err);
-      setNotification('Failed to create blog', 'error');
-    }
+    blogFormRef.current.toggleVisibility();
   };
 
   return (
-    <div>
+    <div className='mt-5 ms-5'>
       <Togglable buttonLabel={'Create Blog'} ref={blogFormRef}>
         <CreateBlogForm
           createBlog={createBlog}
