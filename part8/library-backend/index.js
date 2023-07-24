@@ -87,7 +87,7 @@ const { v1: uuid } = require('uuid');
 //     genres: ['classic', 'crime']
 //   },
 //   {
-//     title: 'The Demon ',
+//     title: 'The Demon',
 //     published: 1872,
 //     author: 'Fyodor Dostoevsky',
 //     id: "afa5de04-344d-11e9-a414-719c6709cf3e",
@@ -150,80 +150,85 @@ const typeDefs = `
 const resolvers = {
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
-    // allBooks: (root, args) => {
-    //   if (!args.author && !args.genre)
-    //     return books;
-    //   else if (args.author && !args.genre)
-    //     return books.filter(b => b.author === args.author);
-    //   else if (!args.author && args.genre)
-    //     return books.filter(b => b.genres.includes(args.genre));
-    //   else
-    //     return books.filter(b => b.author === args.author && b.genres.includes(args.genre));
-    // },
-    authorCount: async () => Author.collection.countDocuments(),
-    allAuthors: async () => Author.find({}),
+    allBooks: async (root, args) => {
+      if (!args.author && !args.genre)
+        return await Book.find({}).populate('author');
+      else if (args.author && !args.genre) {
+        const author = await Author.findOne({ name: args.author });
+        if (!author) return null;
+
+        const book = await Book.find({ author: author._id.toString() }).populate('author');
+        return book;
+      }
+      else if (!args.author && args.genre)
+        return await Book.find({ genres: { $in: [args.genre] } }).populate('author');
+      else {
+        const author = await Author.findOne({ name: args.author });
+        return await Book.find({ author: author._id.toString(), genres: { $in: [args.genre] } }).populate('author');
+      }
+    },
+    authorCount: async () => await Author.collection.countDocuments(),
+    allAuthors: async () => await Author.find({}),
   },
   Mutation: {
     addBook: async (root, args) => {
+      let author;
       try {
-        let author;
-        try {
-          author = await (async () => {
-            const author = await Author.findOne({ name: args.author });
-            console.log('author', author);
-            return author ? author : await (new Author({ name: args.author })).save();
-          })();
-        } catch (error) {
-          console.log(error);
-          throw new GraphQLError(`Error adding author: ${err.message}`, {
-            extensions: {
-              code: 'BAD_USER_INPUT',
-              invalidArgs: args.author,
-              error
-            }
-          });
-        }
-        
-        const book = new Book({ ...args, author: author._id.toString() });
-        try {
-          await book.save();
-        } catch (error) {
-          console.log(error);
-          throw new GraphQLError(`Error adding book: ${error.message}`, {
-            extensions: {
-              code: 'BAD_USER_INPUT',
-              invalidArgs: [args.title, args.published, args.genres],
-              error
-            }
-          });
-        }
-
-        return book;
+        author = await (async () => {
+          const author = await Author.findOne({ name: args.author });
+          return author ? author : await (new Author({ name: args.author })).save();
+        })();
       } catch (error) {
         console.log(error);
-        return error.message;
+        throw new GraphQLError(`Error adding author: ${err.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.author,
+            error
+          }
+        });
       }
+      
+      const book = new Book({ ...args, author: author._id.toString() });
+      try {
+        await book.save();
+      } catch (error) {
+        console.log(error);
+        throw new GraphQLError(`Error adding book: ${error.message}`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: [args.title, args.published, args.genres],
+            error
+          }
+        });
+      }
+
+      return {
+        ...book._doc,
+        author
+      };
     },
-    // editAuthor: (root, args) => {
-    //   if (args.setBornTo >= (new Date()).getFullYear())
-    //     throw new GraphQLError('Invalid birth year', {
-    //       extensions: {
-    //         code: 'BAD_USER_INPUT',
-    //         invalidArgs: args.setBornTo
-    //       }
-    //     });
+    editAuthor: async (root, args) => {
+      if (args.setBornTo >= (new Date()).getFullYear())
+        throw new GraphQLError('Invalid birth year', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            invalidArgs: args.setBornTo
+          }
+        });
 
-    //   const author = authors.find(a => a.name === args.name);
-    //   if (!author) return null;
+      const author = await Author.findOne({ name: args.name });
+      if (!author) return null;
 
-    //   const updatedAuthor = { ...author, born: args.setBornTo };
-    //   authors = authors.map(a => a.name === args.name ? updatedAuthor : a);
-    //   return updatedAuthor;
-    // }
+      author.born = args.setBornTo;
+      await author.save();
+
+      return author;
+    }
   },
-  // Author: {
-  //   bookCount: (root) => books.filter(b => b.author === root.name).length
-  // }
+  Author: {
+    bookCount: async (root) => Book.find({ author: root._id.toString() }).countDocuments()
+  }
 };
 
 const server = new ApolloServer({
