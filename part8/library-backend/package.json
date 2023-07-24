@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Numbers00",
   "license": "ISC",
   "dependencies": {
     "@apollo/server": "^4.8.1",
-    "graphql": "^16.7.1"
+    "dotenv": "^16.3.1",
+    "graphql": "^16.7.1",
+    "mongoose": "^7.4.0",
+    "mongoose-unique-validator": "^4.0.0"
   }
 }
