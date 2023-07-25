@@ -1,18 +1,25 @@
 import { useQuery } from '@apollo/client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ALL_BOOKS } from '../requests';
 
 const Books = (props) => {
-  const booksRes = useQuery(ALL_BOOKS);
-  const books = booksRes.data?.allBooks;
+  const allBooksRes = useQuery(ALL_BOOKS);
+  const allBooks = allBooksRes.data?.allBooks;
+
+  const filteredBooksRes = useQuery(ALL_BOOKS);
+  const filteredBooks = filteredBooksRes.data?.allBooks;
 
   const [genreFilter, setGenreFilter] = useState('all genres');
 
-  if (!props.show)
+  useEffect(() => {
+    filteredBooksRes.refetch({ genre: genreFilter });
+  }, [genreFilter]); // eslint-disable-line
+
+  if (!props.show)  
     return null
-  else if (booksRes.loading)
+  else if (allBooksRes.loading || filteredBooksRes.loading)
     return <div>loading books...</div>
 
   return (
@@ -25,8 +32,7 @@ const Books = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books && books
-            .filter(b => genreFilter === 'all genres' || b.genres.includes(genreFilter))
+          {filteredBooks && filteredBooks
             .map((b) => (
             <tr key={b.title}>
               <td>{b.title}</td>
@@ -37,7 +43,7 @@ const Books = (props) => {
         </tbody>
       </table>
       <div style={{ display: 'flex', marginTop: 12 }}>
-        {books && [...new Set(books.map(b => b.genres).flat())].map(g => (
+        {allBooks && [...new Set(allBooks.map(b => b.genres).flat())].map(g => (
           <button key={g} onClick={() => setGenreFilter(g)}>{g}</button>
         ))}
         <button onClick={() => setGenreFilter('all genres')}>all genres</button>

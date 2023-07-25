@@ -181,8 +181,14 @@ const resolvers = {
         const book = await Book.find({ author: author._id.toString() }).populate('author');
         return book;
       }
+      else if (!args.author && args.genre && args.genre === 'all genres')
+        return await Book.find({}).populate('author');
       else if (!args.author && args.genre)
         return await Book.find({ genres: { $in: [args.genre] } }).populate('author');
+      else if (args.author && args.genre && args.genre === 'all genres') {
+        const author = await Author.findOne({ name: args.author });
+        return await Book.find({ author: author._id.toString() }).populate('author');
+      }
       else {
         const author = await Author.findOne({ name: args.author });
         return await Book.find({ author: author._id.toString(), genres: { $in: [args.genre] } }).populate('author');
