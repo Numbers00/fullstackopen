@@ -26,6 +26,16 @@ export const ALL_BOOKS = gql`
   }
 `;
 
+export const ME = gql`
+  query {
+    me {
+      id
+      username
+      favoriteGenre
+    }
+  }
+`;
+
 // mutation name (createBook) and function name (addBook) can be same
 // but function name has to follow the same name as declared in the server
 export const ADD_BOOK = gql`
