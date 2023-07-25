@@ -2,12 +2,39 @@ import { useMutation } from '@apollo/client';
 
 import { useState } from 'react';
 
-import { ALL_BOOKS, ADD_BOOK } from '../requests';
+import { ALL_BOOKS, FILTERED_BOOKS, ADD_BOOK } from '../requests';
 
 const NewBook = (props) => {
   const [createBookReq] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }],
-    onError: error => console.log(error.graphQLErrors[0].message),
+    refetchQueries: [{ query: ALL_BOOKS }, { query: FILTERED_BOOKS }],
+    onError: error => {
+      if (error.graphQLErrors)
+        error.graphQLErrors.forEach(({ message }) => console.log(message));
+      else
+        console.log(error.message || error);
+    },
+    // update: (cache, res) => {
+    //   const addedBook = res.data.addBook;
+    //   console.log('addedBook', addedBook);
+    //   console.log('cache', cache);
+
+    //   cache.updateQuery({ query: ALL_BOOKS }, (data) => {
+    //     console.log('data', data);
+    //     const { allBooks } = data;
+    //     return {
+    //       allBooks: allBooks.concat(addedBook)
+    //     }
+    //   });
+
+    //   cache.updateQuery({ query: FILTERED_BOOKS }, (data) => {
+    //     console.log('data2', data);
+    //     const { allBooks: filteredBooks } = data;
+    //     const genreFilter = [...new Set(filteredBooks.map(b => b.genres).flat())];
+    //     if (genreFilter.length > 1) return { allBooks: filteredBooks.concat(addedBook) };
+    //     else if (addedBook.genres.includes(genreFilter[0])) return { allBooks: filteredBooks.concat(addedBook) };
+    //     else return { filteredBooks };
+    //   });
+    // }
   });
 
   const [title, setTitle] = useState('');

@@ -2,16 +2,16 @@ import { useQuery } from '@apollo/client';
 
 import { useEffect, useState } from 'react';
 
-import { ALL_BOOKS } from '../requests';
+import { ALL_BOOKS, FILTERED_BOOKS } from '../requests';
 
 const Books = (props) => {
   const allBooksRes = useQuery(ALL_BOOKS);
   const allBooks = allBooksRes.data?.allBooks;
 
-  const filteredBooksRes = useQuery(ALL_BOOKS);
-  const filteredBooks = filteredBooksRes.data?.allBooks;
-
   const [genreFilter, setGenreFilter] = useState('all genres');
+
+  const filteredBooksRes = useQuery(FILTERED_BOOKS, { variables: { genre: genreFilter } });
+  const filteredBooks = filteredBooksRes.data?.allBooks;
 
   useEffect(() => {
     filteredBooksRes.refetch({ genre: genreFilter });
@@ -44,7 +44,7 @@ const Books = (props) => {
       </table>
       <div style={{ display: 'flex', marginTop: 12 }}>
         {allBooks && [...new Set(allBooks.map(b => b.genres).flat())].map(g => (
-          <button key={g} onClick={() => setGenreFilter(g)}>{g}</button>
+          <button key={g} onClick={() => setGenreFilter(g)}>{g.toLowerCase()}</button>
         ))}
         <button onClick={() => setGenreFilter('all genres')}>all genres</button>
       </div>

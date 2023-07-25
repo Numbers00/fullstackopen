@@ -172,6 +172,7 @@ const resolvers = {
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
     allBooks: async (root, args) => {
+      console.log('args', args);
       if (!args.author && !args.genre)
         return await Book.find({}).populate('author');
       else if (args.author && !args.genre) {
@@ -184,14 +185,14 @@ const resolvers = {
       else if (!args.author && args.genre && args.genre === 'all genres')
         return await Book.find({}).populate('author');
       else if (!args.author && args.genre)
-        return await Book.find({ genres: { $in: [args.genre] } }).populate('author');
+        return await Book.find({ genres: { $in: [new RegExp(args.genre, 'i')] } }).populate('author');
       else if (args.author && args.genre && args.genre === 'all genres') {
         const author = await Author.findOne({ name: args.author });
         return await Book.find({ author: author._id.toString() }).populate('author');
       }
       else {
         const author = await Author.findOne({ name: args.author });
-        return await Book.find({ author: author._id.toString(), genres: { $in: [args.genre] } }).populate('author');
+        return await Book.find({ author: author._id.toString(), genres: { $in: [new RegExp(args.genre, 'i')] } }).populate('author');
       }
     },
     authorCount: async () => await Author.collection.countDocuments(),
@@ -201,7 +202,6 @@ const resolvers = {
   Mutation: {
     addBook: async (root, args, context) => {
       const { user } = context;
-      console.log('user', user);
       if (!user)
         throw new GraphQLError('not authenticated', {
           extensions: {
@@ -225,12 +225,11 @@ const resolvers = {
           }
         });
       }
-      console.log('author', author);
       
-      let book;
+      let createdBook;
       try {
-        book = new Book({ ...args, author: author._id.toString() });
-        await book.save();
+        const book = new Book({ ...args, author: author._id.toString() });
+        createdBook = await book.save();
       } catch (error) {
         console.log(error);
         throw new GraphQLError(`Error adding book: ${error.message}`, {
@@ -241,10 +240,9 @@ const resolvers = {
           }
         });
       }
-      console.log('book', book);
 
       return {
-        ...book._doc,
+        ...createdBook._doc,
         author
       };
     },

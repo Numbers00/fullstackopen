@@ -1,16 +1,24 @@
 import { useQuery } from '@apollo/client';
 
-import { ALL_BOOKS, ME } from '../requests';
+import { useEffect } from 'react';
+
+import { FILTERED_BOOKS, ME } from '../requests';
+
 
 const Recommendations = ({ show }) => {
-  const booksRes = useQuery(ALL_BOOKS);
-  const books = booksRes.data?.allBooks;
+  const filteredBooksRes = useQuery(FILTERED_BOOKS);
+  const filteredBooks = filteredBooksRes.data?.allBooks;
 
   const meRes = useQuery(ME);
   const me = meRes.data?.me;
 
+  useEffect(() => {
+    if (me?.favoriteGenre)
+      filteredBooksRes.refetch({ genre: me.favoriteGenre });
+  }, [me]); // eslint-disable-line
+
   if (!show) return null;
-  else if (booksRes.loading || meRes.loading) return <div>loading...</div>;
+  else if (filteredBooksRes.loading || meRes.loading) return <div>loading...</div>;
 
   return (
     <div>
@@ -23,8 +31,7 @@ const Recommendations = ({ show }) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books && books
-            .filter(b => b.genres.includes(me.favoriteGenre))
+          {filteredBooks && filteredBooks
             .map((b) => (
             <tr key={b.title}>
               <td>{b.title}</td>
