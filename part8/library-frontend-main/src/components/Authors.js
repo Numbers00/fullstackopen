@@ -9,15 +9,18 @@ const Authors = (props) => {
   const authorsRes = useQuery(ALL_AUTHORS);
   const authors = authorsRes.data?.allAuthors;
 
-  const [updateBirthyear] = useMutation(UPDATE_BIRTHYEAR, {
+  const [updateBirthyearReq] = useMutation(UPDATE_BIRTHYEAR, {
     refetchQueries: [{ query: ALL_AUTHORS }]
   });
 
   const { reset: resetName, ...name } = useField('text');
-  const { reset: resetBirthyear, ...birthyear } = useField('number');
+  const { reset: resetBirthyear, ...birthyear } = useField('number', 2000);
   const changeBirthyear = e => {
     e.preventDefault();
-    updateBirthyear({ variables: { name: name.value, setBornTo: parseInt(birthyear.value) } });
+    if (!name.value || !birthyear.value) return;
+
+    console.log(name.value)
+    updateBirthyearReq({ variables: { name: name.value, setBornTo: parseInt(birthyear.value) } });
     resetName();
     resetBirthyear();
   };
@@ -37,7 +40,7 @@ const Authors = (props) => {
             <th>born</th>
             <th>books</th>
           </tr>
-          {authors.map((a) => (
+          {authors && authors.map((a) => (
             <tr key={a.name}>
               <td>{a.name}</td>
               <td>{a.born}</td>
@@ -50,9 +53,10 @@ const Authors = (props) => {
       <form onSubmit={changeBirthyear}>
         <div style={{ display: 'flex', marginBottom: 12 }}>
           <label htmlFor='nameSelect' style={{ marginRight: 8 }}>name</label>
-          <select id='nameSelect' value={name.value} onChange={name.onChange}>
-            {authors.map(a => (
-              <option key={a.name} value={a.name}>
+          <select id='nameSelect' onChange={name.onChange}>
+            <option value=''>Select author</option>
+            {authors && authors.map((a, i) => (
+              <option key={i} value={a.name}>
                 {a.name}
               </option>
             ))}
@@ -62,7 +66,7 @@ const Authors = (props) => {
           <label htmlFor='birthyearInput' style={{ marginRight: 8 }}>born</label>
           <input id='birthyearInput' {...birthyear} />
         </div>
-        <button type='submit'>Update Author</button>
+        <button type='submit'>update author</button>
       </form>
     </div>
   );
