@@ -1,54 +1,66 @@
 import { gql } from '@apollo/client';
 
+const AUTHOR_DETAILS = gql`
+  fragment AuthorDetails on Author {
+    id
+    name
+    born
+    bookCount
+  }
+`;
 export const ALL_AUTHORS = gql`
   query {
     allAuthors {
-      name
-      id
-      born
-      bookCount
+      ...AuthorDetails
     }
   }
+  ${AUTHOR_DETAILS}
 `;
 
+const BOOK_DETAILS = gql`
+  fragment BookDetails on Book {
+    title
+    publised
+    id
+    genres
+  }
+`;
 export const ALL_BOOKS = gql`
   query allBooks {
     allBooks {
-      title
-      published
-      author {
-        name
-        born
-      }
-      id
-      genres
+      ...BookDetails
+      AuthorDetails
     }
   }
+  ${AUTHOR_DETAILS}
+  ${BOOK_DETAILS}
 `;
 
 export const FILTERED_BOOKS = gql`
   query filterBooks($author: String, $genre: String) {
     allBooks(author: $author, genre: $genre) {
-      title
-      published
-      author {
-        name
-        born
-      }
-      id
-      genres
+      ...BookDetails
+      AuthorDetails
     }
   }
+  ${AUTHOR_DETAILS}
+  ${BOOK_DETAILS}
 `;
 
+const USER_DETAILS = gql`
+  fragment UserDetails on User {
+    id
+    username
+    favoriteGenre
+  }
+`;
 export const ME = gql`
   query {
     me {
-      id
-      username
-      favoriteGenre
+      ...UserDetails
     }
   }
+  ${USER_DETAILS}
 `;
 
 // mutation name (createBook) and function name (addBook) can be same
@@ -56,25 +68,21 @@ export const ME = gql`
 export const ADD_BOOK = gql`
   mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
     addBook(title: $title, author: $author, published: $published, genres: $genres) {
-      title
-      published
-      genres
-      author {
-        name
-        born
-      }
+      ...BookDetails
+      AuthorDetails
     }
   }
+  ${AUTHOR_DETAILS}
+  ${BOOK_DETAILS}
 `;
 
 export const UPDATE_BIRTHYEAR = gql`
   mutation updateBirthyear($name: String!, $setBornTo: Int!) {
     editAuthor(name: $name, setBornTo: $setBornTo) {
-      name
-      born
-      bookCount
+      ...AuthorDetails
     }
   }
+  ${AUTHOR_DETAILS}
 `;
 
 export const LOGIN = gql`
