@@ -2,12 +2,26 @@ import { useQuery, useSubscription } from '@apollo/client';
 
 import { useEffect, useState } from 'react';
 
+import { updateCache } from '../helpers';
+
 import { ALL_BOOKS, FILTERED_BOOKS, BOOK_ADDED } from '../requests';
+
 
 const Books = (props) => {
   useSubscription(BOOK_ADDED, {
-    onData: ({ data }) => {
-      window.alert(`New book added: ${data.data.bookAdded.title}`);
+    onData: ({ data, client }) => {
+      const addedBook = data.data.bookAdded;
+      window.alert(`New book added: ${addedBook.title}`);
+      updateCache(client.cache, { query: ALL_BOOKS }, 'allBooks', addedBook);
+      addedBook.genres.forEach(g => {
+        const filteredBooksData = client.cache.readQuery({
+          query: FILTERED_BOOKS,
+          variables: { genre: g },
+        });
+        console.log('filteredBooksData', filteredBooksData);
+        if (filteredBooksData) 
+          updateCache(client.cache, { query: FILTERED_BOOKS, variables: { genre: g } }, 'allBooks', addedBook);
+      });
     }
   });
 
@@ -48,11 +62,17 @@ const Books = (props) => {
           ))}
         </tbody>
       </table>
-      <div style={{ display: 'flex', marginTop: 12 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: 12 }}>
         {allBooks && [...new Set(allBooks.map(b => b.genres).flat())].map(g => (
-          <button key={g} onClick={() => setGenreFilter(g)}>{g.toLowerCase()}</button>
+          <button
+            style={{ marginBottom: 12 }}
+            key={g}
+            onClick={() => setGenreFilter(g)}
+          >
+            { g.toLowerCase() }
+          </button>
         ))}
-        <button onClick={() => setGenreFilter('all genres')}>all genres</button>
+        <button style={{ marginBottom: 12 }} onClick={() => setGenreFilter('all genres')}>all genres</button>
       </div>
     </div>
   )

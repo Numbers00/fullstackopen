@@ -2,17 +2,35 @@ import { useMutation } from '@apollo/client';
 
 import { useState } from 'react';
 
+import { updateCache } from '../helpers';
+
 import { ALL_BOOKS, FILTERED_BOOKS, ADD_BOOK } from '../requests';
+
 
 const NewBook = (props) => {
   const [createBookReq] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: FILTERED_BOOKS }],
+    // refetchQueries: [{ query: ALL_BOOKS }, { query: FILTERED_BOOKS }],
     onError: error => {
       if (error.graphQLErrors)
         error.graphQLErrors.forEach(({ message }) => console.log(message));
       else
         console.log(error.message || error);
     },
+    update: (cache, res) => {
+      const addedBook = res.data.addBook;
+      console.log('addedBook', addedBook);
+
+      updateCache(cache, { query: ALL_BOOKS }, 'allBooks', addedBook);
+      addedBook.genres.forEach(g => {
+        const filteredBooksData = cache.readQuery({
+          query: FILTERED_BOOKS,
+          variables: { genre: g },
+        });
+        console.log('filteredBooksData', filteredBooksData);
+        if (filteredBooksData) 
+          updateCache(cache, { query: FILTERED_BOOKS, variables: { genre: g } }, 'allBooks', addedBook);
+      });
+    }
     // update: (cache, res) => {
     //   const addedBook = res.data.addBook;
     //   console.log('addedBook', addedBook);

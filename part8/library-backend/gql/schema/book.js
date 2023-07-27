@@ -107,7 +107,10 @@ const resolvers = {
       const detailedBook = {
         ...createdBook._doc,
         id: createdBook._id,
-        author
+        author: {
+          ...author._doc,
+          id: author._id
+        }
       };
       console.log('detailedBook', detailedBook);
       pubsub.publish('BOOK_ADDED', { bookAdded: detailedBook });
