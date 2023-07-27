@@ -2,6 +2,7 @@ const { MONGODB_URI } = require('./config');
 
 const mongoose = require('mongoose');
 mongoose.set('strictQuery', false);
+mongoose.set('debug', true);
 
 console.log('connecting to', MONGODB_URI);
 

@@ -18,7 +18,6 @@ const Books = (props) => {
           query: FILTERED_BOOKS,
           variables: { genre: g },
         });
-        console.log('filteredBooksData', filteredBooksData);
         if (filteredBooksData) 
           updateCache(client.cache, { query: FILTERED_BOOKS, variables: { genre: g } }, 'allBooks', addedBook);
       });

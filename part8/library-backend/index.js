@@ -13,6 +13,8 @@ const jwt = require('jsonwebtoken');
 
 const User = require('./models/user');
 
+const loaders = require('./gql/loaders');
+
 const { connectToDatabase } = require('./utils/db');
 
 const { typeDefs, resolvers } = require('./gql/schema');
@@ -57,8 +59,8 @@ const start = async () => {
         if (auth && auth.startsWith('Bearer ')) {
           const decodedToken = jwt.verify(auth.substring(7), process.env.SECRET);
           const user = await User.findById(decodedToken.id);
-          return { user };
-        }
+          return { user, loaders };
+        } 
       },
     }),
   );

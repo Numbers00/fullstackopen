@@ -2,6 +2,8 @@ import { useMutation, useQuery } from '@apollo/client';
 
 import { useField } from '../hooks';
 
+import { updateCache } from '../helpers';
+
 import { ALL_AUTHORS, UPDATE_BIRTHYEAR } from '../requests';
 
 
@@ -10,7 +12,10 @@ const Authors = (props) => {
   const authors = authorsRes.data?.allAuthors;
 
   const [updateBirthyearReq] = useMutation(UPDATE_BIRTHYEAR, {
-    refetchQueries: [{ query: ALL_AUTHORS }]
+    // refetchQueries: [{ query: ALL_AUTHORS }]
+    update: (cache, res) => {
+      updateCache(cache, { query: ALL_AUTHORS }, 'allAuthors', res.data.editAuthor);
+    }
   });
 
   const { reset: resetName, ...name } = useField('text');

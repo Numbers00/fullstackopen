@@ -55,7 +55,7 @@ const resolvers = {
     }
   },
   Author: {
-    bookCount: async (root) => Book.find({ author: root._id.toString() }).countDocuments()
+    bookCount: async ({ _id }, args, { loaders }) => loaders.authorLoader.load(_id)
   }
 };
 

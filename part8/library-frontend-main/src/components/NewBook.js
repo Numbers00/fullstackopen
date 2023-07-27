@@ -18,7 +18,6 @@ const NewBook = (props) => {
     },
     update: (cache, res) => {
       const addedBook = res.data.addBook;
-      console.log('addedBook', addedBook);
 
       updateCache(cache, { query: ALL_BOOKS }, 'allBooks', addedBook);
       addedBook.genres.forEach(g => {
@@ -26,33 +25,10 @@ const NewBook = (props) => {
           query: FILTERED_BOOKS,
           variables: { genre: g },
         });
-        console.log('filteredBooksData', filteredBooksData);
         if (filteredBooksData) 
           updateCache(cache, { query: FILTERED_BOOKS, variables: { genre: g } }, 'allBooks', addedBook);
       });
     }
-    // update: (cache, res) => {
-    //   const addedBook = res.data.addBook;
-    //   console.log('addedBook', addedBook);
-    //   console.log('cache', cache);
-
-    //   cache.updateQuery({ query: ALL_BOOKS }, (data) => {
-    //     console.log('data', data);
-    //     const { allBooks } = data;
-    //     return {
-    //       allBooks: allBooks.concat(addedBook)
-    //     }
-    //   });
-
-    //   cache.updateQuery({ query: FILTERED_BOOKS }, (data) => {
-    //     console.log('data2', data);
-    //     const { allBooks: filteredBooks } = data;
-    //     const genreFilter = [...new Set(filteredBooks.map(b => b.genres).flat())];
-    //     if (genreFilter.length > 1) return { allBooks: filteredBooks.concat(addedBook) };
-    //     else if (addedBook.genres.includes(genreFilter[0])) return { allBooks: filteredBooks.concat(addedBook) };
-    //     else return { filteredBooks };
-    //   });
-    // }
   });
 
   const [title, setTitle] = useState('');
