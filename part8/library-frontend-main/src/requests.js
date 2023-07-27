@@ -20,7 +20,7 @@ export const ALL_AUTHORS = gql`
 const BOOK_DETAILS = gql`
   fragment BookDetails on Book {
     title
-    publised
+    published
     id
     genres
   }
@@ -29,7 +29,9 @@ export const ALL_BOOKS = gql`
   query allBooks {
     allBooks {
       ...BookDetails
-      AuthorDetails
+      author {
+        ...AuthorDetails
+      }
     }
   }
   ${AUTHOR_DETAILS}
@@ -40,7 +42,9 @@ export const FILTERED_BOOKS = gql`
   query filterBooks($author: String, $genre: String) {
     allBooks(author: $author, genre: $genre) {
       ...BookDetails
-      AuthorDetails
+      author {
+        ...AuthorDetails
+      }
     }
   }
   ${AUTHOR_DETAILS}
@@ -63,13 +67,16 @@ export const ME = gql`
   ${USER_DETAILS}
 `;
 
+// Mutations
 // mutation name (createBook) and function name (addBook) can be same
 // but function name has to follow the same name as declared in the server
 export const ADD_BOOK = gql`
   mutation createBook($title: String!, $author: String!, $published: Int!, $genres: [String!]!) {
     addBook(title: $title, author: $author, published: $published, genres: $genres) {
       ...BookDetails
-      AuthorDetails
+      author {
+        ...AuthorDetails
+      }
     }
   }
   ${AUTHOR_DETAILS}
@@ -91,4 +98,19 @@ export const LOGIN = gql`
       value #token
     }
   }
+`;
+
+
+// Subscriptions
+export const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails
+      author {
+        ...AuthorDetails
+      }
+    }
+  }
+  ${AUTHOR_DETAILS}
+  ${BOOK_DETAILS}
 `;

@@ -1,10 +1,16 @@
-import { useQuery } from '@apollo/client';
+import { useQuery, useSubscription } from '@apollo/client';
 
 import { useEffect, useState } from 'react';
 
-import { ALL_BOOKS, FILTERED_BOOKS } from '../requests';
+import { ALL_BOOKS, FILTERED_BOOKS, BOOK_ADDED } from '../requests';
 
 const Books = (props) => {
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      window.alert(`New book added: ${data.data.bookAdded.title}`);
+    }
+  });
+
   const allBooksRes = useQuery(ALL_BOOKS);
   const allBooks = allBooksRes.data?.allBooks;
 
