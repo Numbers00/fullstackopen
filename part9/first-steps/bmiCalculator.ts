@@ -26,5 +26,3 @@ try {
   let errorMessage = err instanceof Error ? err.message : 'Unknown error';
   console.log(`Error: ${errorMessage}`);
 }
-
-export {};
