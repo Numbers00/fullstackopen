@@ -7,7 +7,7 @@ const parseArgs = (args: string[]): { height: number, weight: number } => {
   return {
     height: numArgs[0],
     weight: numArgs[1]
-  }
+  };
 };
 
 // height in cm, weight in kg
@@ -23,6 +23,6 @@ try {
   const { height, weight } = parseArgs(process.argv);
   console.log(calculateBmi(height, weight));
 } catch (err: unknown) {
-  let errorMessage = err instanceof Error ? err.message : 'Unknown error';
+  const errorMessage = err instanceof Error ? err.message : 'Unknown error';
   console.log(`Error: ${errorMessage}`);
 }

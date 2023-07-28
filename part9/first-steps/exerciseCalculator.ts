@@ -7,7 +7,7 @@ const parseArgs = (args: string[]): { dailyExerTime: number[], targetDaily: numb
   return {
     dailyExerTime: numArgs.slice(1),
     targetDaily: numArgs[0]
-  }
+  };
 };
 
 interface ExerciseValues {
@@ -34,7 +34,7 @@ const calculateExercises = (dailyExerTime: number[], targetDaily: number): Exerc
     ratingDescription,
     target: targetDaily,
     average: dailyAvg
-  }
+  };
 };
 
 try {
