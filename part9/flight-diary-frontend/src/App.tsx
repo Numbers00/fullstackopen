@@ -1,15 +1,19 @@
+import axios from 'axios';
+
 import { useEffect, useState } from 'react';
 
 import diaryService from './services/diaryService';
 
-import { NewDiaryEntry, NonSensitiveDiaryEntry, Weather, Visibility } from './types';
+import { ValidationError, NewDiaryEntry, NonSensitiveDiaryEntry, Weather, Visibility } from './types';
+import { isValidationError } from './utils';
 
 import './App.css';
 
 
 function App() {
   const [diaryEntries, setDiaryEntries] = useState<NonSensitiveDiaryEntry[]>([]);
-  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const initialNewDiary = {
     date: '',
     weather: Weather.Sunny,
@@ -34,14 +38,25 @@ function App() {
       const createdDiary = await diaryService.create(newDiaryEntry);
       setDiaryEntries(diaryEntries.concat(createdDiary));
       setNewDiaryEntry({ ...initialNewDiary });
-    } catch (err: unknown) {
-      console.log(err instanceof Error ? err.message : 'Unknown error');
+    } catch (error: unknown) {
+      if (axios.isAxiosError<ValidationError, Record<string, unknown>>(error)) {
+        if (error.response && isValidationError(error.response.data)) {
+          const validationError: ValidationError = error.response.data;
+          setErrorMessage(validationError.message);
+          setTimeout(() => setErrorMessage(null), 5000);
+        } else
+          console.log('Unknown axios error');
+      } else if (error instanceof Error)
+        console.log(error.message);
+      else
+        console.log('Unknown error');
     }
   };
 
   return (
     <div className='App'>
       <h2>Add New Entry</h2>
+      {errorMessage && <p style={{ color: 'red' }}>{ errorMessage }</p>}
       <form id='addDiaryEntryForm' onSubmit={addDiaryEntry}>
         <div>
           <label htmlFor='dateInput'>Date</label>

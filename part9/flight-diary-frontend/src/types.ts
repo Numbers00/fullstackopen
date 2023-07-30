@@ -1,3 +1,7 @@
+export interface ValidationError {
+  message: string;
+}
+
 export enum Weather {
   Sunny = 'sunny',
   Rainy = 'rainy',
