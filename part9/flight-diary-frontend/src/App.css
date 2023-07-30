@@ -42,6 +42,6 @@
   margin-bottom: 8px;
 }
 
-#addDiaryEntryForm label {
+#addDiaryEntryForm > div:not(:has(input[type="radio"])) > label {
   margin-right: 8px;
 }
