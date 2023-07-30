@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+#addDiaryEntryForm div {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+#addDiaryEntryForm label {
+  margin-right: 8px;
+}
