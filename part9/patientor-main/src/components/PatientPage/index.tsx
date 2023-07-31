@@ -22,7 +22,7 @@ const PatientPage = () => {
 
   useEffect(() => {
     void fetchPatient();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!patient) return null;
 
@@ -34,6 +34,21 @@ const PatientPage = () => {
       </div>
       <Typography variant="body1">ssn: { patient.ssn }</Typography>
       <Typography variant="body1">occupation: { patient.occupation }</Typography>
+      <div>
+        <Typography variant="h5">entries</Typography>
+        {patient.entries && patient.entries.map((e, i) => (
+          <div key={i}>
+            <Typography variant="body1">{ e.date } { e.description }</Typography>
+            {e.diagnosisCodes && (
+              <ul>
+                {e.diagnosisCodes.map((d, j) => (
+                  <li key={j}>{ d }</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
