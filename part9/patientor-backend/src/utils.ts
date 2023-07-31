@@ -34,11 +34,16 @@ const parseSSN = (ssn: unknown): string => {
   return ssn;
 };
 
-const parseGender = (gender: unknown): string => {
+const parseGender = (gender: unknown): Gender => {
   if (!isString(gender) || !isGender(gender))
     throw new Error('Incorrect or missing gender');
 
-  return gender;
+  switch (gender.toLowerCase()) {
+  case 'male': return Gender.Male;
+  case 'female': return Gender.Female;
+  case 'other': return Gender.Other;
+  default: throw new Error('Invalid gender');
+  }
 };
 
 const parseOccupation = (occupation: unknown): string => {

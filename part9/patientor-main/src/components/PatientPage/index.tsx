@@ -4,13 +4,16 @@ import MaleIcon from '@mui/icons-material/Male';
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import diagnosisService from "../../services/diagnoses";
 import patientService from "../../services/patients";
 
-import { Patient } from "../../types";
+import { Diagnosis, Entry, Patient } from "../../types";
+import { isString } from '../../utils';
 
 const PatientPage = () => {
   const { id } = useParams<{ id: string | undefined }>();
 
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [patient, setPatient] = useState<Patient>();
 
   const fetchPatient = async () => {
@@ -23,6 +26,17 @@ const PatientPage = () => {
   useEffect(() => {
     void fetchPatient();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchRelevantDiagnoses = async (entries: Entry[]) => {
+    const diagnosisCodes = entries.map(e => e.diagnosisCodes).flat().filter(isString);
+    const diagnoses = await diagnosisService.getByCode(diagnosisCodes);
+    setDiagnoses(diagnoses);
+  };
+
+  useEffect(() => {
+    if (patient)
+      void fetchRelevantDiagnoses(patient.entries);
+  }, [patient]);
 
   if (!patient) return null;
 
@@ -39,10 +53,10 @@ const PatientPage = () => {
         {patient.entries && patient.entries.map((e, i) => (
           <div key={i}>
             <Typography variant="body1">{ e.date } { e.description }</Typography>
-            {e.diagnosisCodes && (
+            {diagnoses && (
               <ul>
-                {e.diagnosisCodes.map((d, j) => (
-                  <li key={j}>{ d }</li>
+                {diagnoses.map((d, j) => (
+                  <li key={j}>{ d.code } { d.name }</li>
                 ))}
               </ul>
             )}
