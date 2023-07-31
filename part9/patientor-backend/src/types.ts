@@ -1,3 +1,6 @@
+// Define special omit for unions
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+
 export interface Diagnosis {
   code: string;
   name: string;
@@ -42,6 +45,7 @@ export interface OccupationalHealthcareEntry extends BaseEntry {
 }
 
 export type Entry = HealthCheckEntry | HospitalEntry | OccupationalHealthcareEntry;
+export type NewEntry = UnionOmit<Entry, 'id'>;
 
 export enum Gender {
   Male = 'male',
