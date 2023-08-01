@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Box, Button, Typography } from '@mui/material';
+import { Alert, Box, Button, Typography } from '@mui/material';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
 
@@ -20,6 +20,7 @@ const PatientPage = () => {
 
   const [addEntryFormVisibility, setAddEntryFormVisibility] = useState<'' | 'HealthCheckEntry' | 'HospitalEntry' | 'OccupationalHealthcareEntry'>('');
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+  const [error, setError] = useState<string | undefined>();
   const [patient, setPatient] = useState<Patient>();
 
   const fetchPatient = async () => {
@@ -55,20 +56,27 @@ const PatientPage = () => {
     if (!id || !(newEntry.type === 'HealthCheck' || newEntry.type === 'Hospital' || newEntry.type === 'OccupationalHealthcare')) return;
 
     try {
-      patientService.addEntry(id, newEntry);
+      await patientService.addEntry(id, newEntry);
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         if (e?.response?.data && typeof e?.response?.data === "string") {
           const message = e.response.data.replace('Something went wrong. Error: ', '');
           console.error(message);
+          setError(message);
         } else {
           console.error("Unrecognized axios error");
+          setError("Unrecognized axios error");
         }
       } else {
-        console.error("Unknown error", e);
+        console.error("Unknown error");
+        setError("Unknown error");
       }
+
+      setTimeout(() => setError(undefined), 5000);
     }
   };
+
+  useEffect(() => console.log(error), [error]);
 
   if (!patient) return null;
   return (
@@ -88,6 +96,7 @@ const PatientPage = () => {
           Add Health Check Entry
         </Button>
       </Box>
+      {error && <Alert severity="error">{error}</Alert>}
       <AddEntryForm visibility={addEntryFormVisibility} addEntry={addEntry} />
       <Box>
         <Typography variant="h5">entries</Typography>
