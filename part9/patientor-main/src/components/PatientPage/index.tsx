@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { Box, Button, Typography } from '@mui/material';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
@@ -5,17 +6,19 @@ import MaleIcon from '@mui/icons-material/Male';
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import AddEntryForm from "./AddEntryForm";
 import EntryDetails from "./EntryDetails";
 
 import diagnosisService from "../../services/diagnoses";
 import patientService from "../../services/patients";
 
-import { Diagnosis, Entry, Patient } from "../../types";
+import { Diagnosis, Entry, EntryFormValues, Patient } from "../../types";
 import { isString } from '../../utils';
 
 const PatientPage = () => {
   const { id } = useParams<{ id: string | undefined }>();
 
+  const [addEntryFormVisibility, setAddEntryFormVisibility] = useState<'' | 'HealthCheckEntry' | 'HospitalEntry' | 'OccupationalHealthcareEntry'>('');
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [patient, setPatient] = useState<Patient>();
 
@@ -41,8 +44,33 @@ const PatientPage = () => {
       void fetchRelevantDiagnoses(patient.entries);
   }, [patient]);
 
-  if (!patient) return null;
+  const toggleAddEntryForm = (mode: string) => {
+    if (mode === addEntryFormVisibility)
+      setAddEntryFormVisibility('');
+    else if (mode === 'HealthCheckEntry' || mode === 'HospitalEntry' || mode === 'OccupationalHealthcareEntry')
+      setAddEntryFormVisibility(mode);
+  };
 
+  const addEntry = async (newEntry: EntryFormValues) => {
+    if (!id || !(newEntry.type === 'HealthCheck' || newEntry.type === 'Hospital' || newEntry.type === 'OccupationalHealthcare')) return;
+
+    try {
+      patientService.addEntry(id, newEntry);
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        if (e?.response?.data && typeof e?.response?.data === "string") {
+          const message = e.response.data.replace('Something went wrong. Error: ', '');
+          console.error(message);
+        } else {
+          console.error("Unrecognized axios error");
+        }
+      } else {
+        console.error("Unknown error", e);
+      }
+    }
+  };
+
+  if (!patient) return null;
   return (
     <Box mt={2}>
       <Box display="flex" alignItems="center">
@@ -55,15 +83,18 @@ const PatientPage = () => {
       </Box>
       <Typography variant="body1">ssn: { patient.ssn }</Typography>
       <Typography variant="body1">occupation: { patient.occupation }</Typography>
-      <Box mb={2}>
+      <Box my={2} display="flex">
+        <Button variant="contained" color="primary" onClick={() => toggleAddEntryForm('HealthCheckEntry')}>
+          Add Health Check Entry
+        </Button>
+      </Box>
+      <AddEntryForm visibility={addEntryFormVisibility} addEntry={addEntry} />
+      <Box>
         <Typography variant="h5">entries</Typography>
         {patient.entries && patient.entries.map((e, i) => (
           <EntryDetails key={i} entry={e} diagnoses={diagnoses} />
         ))}
       </Box>
-      <Button variant="contained" color="primary">
-        Add Entry
-      </Button>
     </Box>
   );
 };

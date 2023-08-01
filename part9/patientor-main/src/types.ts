@@ -1,3 +1,6 @@
+// Define special omit for unions
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown ? Omit<T, K> : never;
+
 export interface Diagnosis {
   code: string;
   name: string;
@@ -23,6 +26,7 @@ export interface HealthCheckEntry extends BaseEntry {
   type: 'HealthCheck';
   healthCheckRating: HealthCheckRating;
 }
+export type HealthCheckEntryFormValues = Omit<HealthCheckEntry, "id">;
 
 export interface HospitalEntry extends BaseEntry {
   type: 'Hospital';
@@ -31,6 +35,7 @@ export interface HospitalEntry extends BaseEntry {
     criteria: string;
   }
 }
+export type HospitalEntryFormValues = Omit<HospitalEntry, "id">;
 
 export interface OccupationalHealthcareEntry extends BaseEntry {
   type: 'OccupationalHealthcare';
@@ -40,8 +45,10 @@ export interface OccupationalHealthcareEntry extends BaseEntry {
     endDate: string;
   }
 }
+export type OccupationalHealthcareEntryFormValues = Omit<OccupationalHealthcareEntry, "id">;
 
 export type Entry = HealthCheckEntry | HospitalEntry | OccupationalHealthcareEntry;
+export type EntryFormValues = UnionOmit<Entry, "id">;
 
 export enum Gender {
   Male = "male",

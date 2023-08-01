@@ -87,14 +87,14 @@ export const toNewEntry = (obj: unknown): NewEntry => {
   if (!obj || typeof obj !== 'object')
     throw new Error('Incorrect or missing entry data');
 
-  if (!('type' in obj && 'id' in obj && 'description' in obj && 'date' in obj && 'specialist' in obj))
+  if (!('type' in obj && 'description' in obj && 'date' in obj && 'specialist' in obj))
     throw new Error('Missing entry data fields');
   
   const initialEntry = {
     description: parseString(obj.description, 'description'),
     date: parseDate(obj.date, 'date'),
     specialist: parseString(obj.specialist, 'specialist'),
-    diagnosisCodes: parseDiagnosisCodes(obj)
+    diagnosisCodes: 'diagnosisCodes' in obj ? parseDiagnosisCodes(obj.diagnosisCodes) : undefined
   };
   switch (obj.type) {
   case 'HealthCheck':
