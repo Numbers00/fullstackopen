@@ -1,4 +1,6 @@
+import dayjs from 'dayjs';
 import { Box, Button, Divider, FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { DateField } from '@mui/x-date-pickers/DateField';
 
 import { useState } from "react";
 
@@ -40,12 +42,19 @@ const AddHealthCheckEntryForm = ({ addEntry }: Props) => {
           value={newEntry?.description || ""}
           onChange={e => setNewEntry({ ...newEntry, description: e.target.value })}
         />
-        <TextField
+        {/* <TextField
           required
           sx={{ marginBottom: 1 }}
           label="Date"
           value={newEntry?.date || ""}
           onChange={e => setNewEntry({ ...newEntry, date: e.target.value })}
+        /> */}
+        <DateField
+          required
+          sx={{ marginBottom: 1 }}
+          label="Date"
+          value={dayjs(newEntry?.date) || dayjs("")}
+          onChange={(newValue) => setNewEntry({ ...newEntry, date: newValue?.format("YYYY-MM-DD") || "" })}
         />
         <TextField
           required
