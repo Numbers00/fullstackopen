@@ -1,4 +1,6 @@
 import AddHealthCheckEntryForm from './AddHealthCheckEntryForm';
+import AddHospitalEntryForm from './AddHospitalEntryForm';
+import OccupationalHealthcareEntryForm from './AddOccupationalHealthcareEntryForm';
 
 import { EntryFormValues } from '../../../types';
 
@@ -13,9 +15,9 @@ const AddEntryForm = ({ visibility, addEntry }: Props) => {
   case 'HealthCheckEntry':
     return <AddHealthCheckEntryForm addEntry={addEntry} />;
   case 'HospitalEntry':
-    return null;
+    return <AddHospitalEntryForm addEntry={addEntry} />;
   case 'OccupationalHealthcareEntry':
-    return null;
+    return <OccupationalHealthcareEntryForm addEntry={addEntry} />;
   case '':
     return null;
   default:

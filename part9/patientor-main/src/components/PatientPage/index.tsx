@@ -76,8 +76,6 @@ const PatientPage = () => {
     }
   };
 
-  useEffect(() => console.log(error), [error]);
-
   if (!patient) return null;
   return (
     <Box mt={2}>
@@ -92,8 +90,14 @@ const PatientPage = () => {
       <Typography variant="body1">ssn: { patient.ssn }</Typography>
       <Typography variant="body1">occupation: { patient.occupation }</Typography>
       <Box my={2} display="flex">
-        <Button variant="contained" color="primary" onClick={() => toggleAddEntryForm('HealthCheckEntry')}>
+        <Button variant="contained" color="primary" onClick={() => toggleAddEntryForm('HealthCheckEntry')} sx={{ mr: 2 }}>
           Add Health Check Entry
+        </Button>
+        <Button variant="contained" color="primary" onClick={() => toggleAddEntryForm('HospitalEntry')} sx={{ mr: 2 }}>
+          Add Hospital Entry
+        </Button>
+        <Button variant="contained" color="primary" onClick={() => toggleAddEntryForm('OccupationalHealthcareEntry')}>
+          Add Occupational Healthcare Entry
         </Button>
       </Box>
       {error && <Alert severity="error">{error}</Alert>}
