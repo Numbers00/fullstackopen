@@ -9,17 +9,14 @@ import { useParams } from "react-router-dom";
 import AddEntryForm from "./AddEntryForm";
 import EntryDetails from "./EntryDetails";
 
-import diagnosisService from "../../services/diagnoses";
 import patientService from "../../services/patients";
 
-import { Diagnosis, Entry, EntryFormValues, Patient } from "../../types";
-import { isString } from '../../utils';
+import { EntryFormValues, Patient } from "../../types";
 
 const PatientPage = () => {
   const { id } = useParams<{ id: string | undefined }>();
 
   const [addEntryFormVisibility, setAddEntryFormVisibility] = useState<'' | 'HealthCheckEntry' | 'HospitalEntry' | 'OccupationalHealthcareEntry'>('');
-  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
   const [error, setError] = useState<string | undefined>();
   const [patient, setPatient] = useState<Patient>();
 
@@ -33,17 +30,6 @@ const PatientPage = () => {
   useEffect(() => {
     void fetchPatient();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const fetchRelevantDiagnoses = async (entries: Entry[]) => {
-    const diagnosisCodes = entries.map(e => e.diagnosisCodes).flat().filter(isString);
-    const diagnoses = await diagnosisService.getByCode(diagnosisCodes);
-    setDiagnoses(diagnoses);
-  };
-
-  useEffect(() => {
-    if (patient)
-      void fetchRelevantDiagnoses(patient.entries);
-  }, [patient]);
 
   const toggleAddEntryForm = (mode: string) => {
     if (mode === addEntryFormVisibility)
@@ -105,7 +91,7 @@ const PatientPage = () => {
       <Box>
         <Typography variant="h5">entries</Typography>
         {patient.entries && patient.entries.map((e, i) => (
-          <EntryDetails key={i} entry={e} diagnoses={diagnoses} />
+          <EntryDetails key={i} entry={e} />
         ))}
       </Box>
     </Box>
